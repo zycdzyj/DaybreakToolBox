@@ -1,0 +1,187 @@
+/* 全局重置与背景设置 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* 使用一张深色抽象图作为背景，以突显毛玻璃效果 */
+    background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #fff;
+}
+
+/* --- 核心样式类 (复用您提供的样式) --- */
+.glass-style {
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+/* --- 整体布局 Grid --- */
+.app-container {
+    width: 900px;
+    height: 600px;
+    display: grid;
+    /* 左侧固定宽度，右侧自适应 */
+    grid-template-columns: 200px 1fr; 
+    gap: 15px;
+    padding: 15px;
+    
+    /* 给整个大窗口也加上一点半透明背景，增强层次感 */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+}
+
+/* 侧边栏 */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-item {
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-align: center;
+    font-weight: 500;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 内容区域 */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* 工具面板 */
+.tool-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: inline-block;
+    /* 简单的下划线装饰 */
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding-bottom: 5px;
+}
+
+/* 输入行与结果行的 Grid 布局 */
+.input-row, .result-row {
+    display: grid;
+    /* 输入框占满剩余空间，按钮固定宽度 */
+    grid-template-columns: 1fr 80px; 
+    gap: 15px;
+    align-items: center;
+}
+
+/* 输入框样式 */
+.glass-input {
+    width: 100%;
+    height: 45px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 0 15px;
+    font-size: 14px;
+    /* 应用核心样式 */
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* 结果展示区样式 */
+.glass-output {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    /* 应用核心样式 */
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.placeholder-text {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+/* 按钮样式 */
+.glass-btn {
+    height: 45px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    transition: transform 0.1s, background 0.3s;
+    
+    /* 应用核心样式 */
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.glass-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.glass-btn:active {
+    transform: scale(0.95);
+}
+
+.secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+}

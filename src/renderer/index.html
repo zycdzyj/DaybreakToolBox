@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>破晓工具箱</title>
+    <link rel="stylesheet" href="assets/main.css">
+
+</head>
+<body>
+    <!-- 主容器 -->
+    <div class="app-container">
+        
+        <!-- 左侧导航栏 -->
+        <aside class="sidebar">
+            <div class="nav-item active">导航栏</div>
+            <div class="nav-item">设置</div>
+            <div class="nav-item">关于</div>
+        </aside>
+
+        <!-- 右侧内容区 -->
+        <main class="content-area">
+            <!-- 标题 -->
+            <header class="header">
+                <h1>破晓工具箱</h1>
+            </header>
+
+            <!-- 功能模块：网易云链接获取 -->
+            <section class="tool-panel">
+                <div class="panel-title">网易云音乐歌曲链接获取</div>
+                
+                <!-- 输入行 (Grid布局) -->
+                <div class="input-row">
+                    <input type="text" class="glass-input" id="user-input" placeholder="在此粘贴链接输入区...">
+                    <button class="glass-btn" id="submitBtn">确定</button>
+                </div>
+
+                <!-- 结果行 (Grid布局) -->
+                <div class="result-row">
+                    <div class="glass-output">
+                        <span class="placeholder-text">结果返回区将显示在这里...</span>
+                    </div>
+                    <button class="glass-btn secondary">复制</button>
+                </div>
+            </section>
+        </main>
+
+    </div>
+</body>
+    <script src="src/renderer.ts"></script>
+</html>
