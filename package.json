@@ -23,12 +23,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "axios": "^1.18.1",
+    "crypto-js": "^4.2.0",
     "electron-updater": "^6.3.9"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.19.1",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",
