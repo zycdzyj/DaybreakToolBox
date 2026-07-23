@@ -92,6 +92,7 @@ body {
     gap: 15px;
     padding: 15px;
     background: #0a0a0a;
+    min-height: 0; /* 关键修复：防止溢出 */
 }
 
 /* 侧边栏 - 纯黑不透明 */
@@ -133,6 +134,8 @@ body {
     flex-direction: column;
     gap: 12px;
     background: #0a0a0a;
+    min-height: 0; /* 关键修复：防止溢出 */
+    height: 100%; /* 关键修复：占满父容器 */
 }
 
 /* --- 搜索区域 --- */
@@ -141,6 +144,7 @@ body {
     border-radius: 12px;
     padding: 12px 15px;
     border: 1px solid #1a1a1a;
+    flex-shrink: 0; /* 防止被压缩 */
 }
 
 .search-row {
@@ -189,16 +193,17 @@ body {
     border-color: #3a3a3a;
 }
 
-/* --- 歌曲列表 --- */
+/* --- 歌曲列表 (关键修复区域) --- */
 .song-list-section {
     flex: 1;
     background: #0a0a0a;
     border-radius: 12px;
     border: 1px solid #1a1a1a;
     padding: 15px;
-    min-height: 150px;
+    min-height: 0; /* 关键修复：允许 flex 收缩 */
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* 防止内容溢出 */
 }
 
 .section-header {
@@ -208,6 +213,7 @@ body {
     margin-bottom: 12px;
     padding-bottom: 10px;
     border-bottom: 1px solid #1a1a1a;
+    flex-shrink: 0; /* 防止标题被压缩 */
 }
 
 .section-title {
@@ -226,9 +232,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    overflow-y: auto;
+    overflow-y: auto; /* 启用垂直滚动 */
+    overflow-x: hidden; /* 隐藏水平滚动 */
+    padding-right: 4px; /* 为滚动条留出空间 */
+    min-height: 0; /* 关键修复：防止 flex 溢出 */
 }
 
+/* 滚动条样式 - 自定义美化 */
 .song-list::-webkit-scrollbar {
     width: 4px;
 }
@@ -242,6 +252,10 @@ body {
     border-radius: 2px;
 }
 
+.song-list::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+}
+
 .song-item {
     display: grid;
     grid-template-columns: 30px 1fr 80px;
@@ -252,6 +266,7 @@ body {
     transition: background 0.2s;
     color: #999999;
     font-size: 13px;
+    flex-shrink: 0; /* 防止列表项被压缩 */
 }
 
 .song-item:hover {
@@ -273,12 +288,18 @@ body {
 .song-name {
     font-weight: 400;
     color: #cccccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .song-artist {
     color: #666666;
     font-size: 12px;
     text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .placeholder-item {
@@ -297,6 +318,7 @@ body {
     border-radius: 12px;
     border: 1px solid #1a1a1a;
     padding: 15px;
+    flex-shrink: 0; /* 防止被压缩 */
 }
 
 .cookie-header {
@@ -372,6 +394,7 @@ body {
 .share-btn:hover {
     background: #2a2a2a;
 }
+
 /* --- 歌曲播放状态栏 --- */
 .player-bar {
     display: grid;
@@ -384,6 +407,7 @@ body {
     padding: 10px 15px;
     min-height: 60px;
     margin-top: 5px;
+    flex-shrink: 0; /* 防止被压缩 */
 }
 
 /* 播放信息 - 左侧 */
@@ -545,6 +569,26 @@ body {
     font-size: 16px;
 }
 
+/* --- 播放状态栏动画 --- */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.player-bar.playing .player-song-name {
+    color: #4fc3f7;
+}
+
+.player-bar.playing .play-btn {
+    background: #1a1a1a;
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+}
+
 /* --- 响应式适配 --- */
 @media (max-width: 768px) {
     .player-bar {
@@ -570,24 +614,4 @@ body {
         order: 4;
         justify-content: center;
     }
-}
-
-/* --- 播放状态栏动画 --- */
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.player-bar.playing .player-song-name {
-    color: #4fc3f7;
-}
-
-.player-bar.playing .play-btn {
-    background: #1a1a1a;
-    border-color: #4fc3f7;
-    color: #4fc3f7;
 }

@@ -1,106 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>网易云音乐 - Electron</title>
-</head>
-<body>
-
+    <link rel="stylesheet" href="assets/main.css" />
+  </head>
+  <body>
     <!-- 整体容器 -->
     <div class="app-container">
-        
-        <!-- 1. 顶部标题栏 (用于拖拽和显示窗口名) -->
-        <div class="title-bar">
-            <div class="window-title">网易云音乐</div>
-            <div class="window-controls">
-                <button class="control-btn btn-close" onclick="window.api.closeWindow()"></button>
-            </div>
+      <!-- 1. 顶部标题栏 (用于拖拽和显示窗口名) -->
+      <div class="title-bar">
+        <div class="window-title">网易云音乐</div>
+        <div class="window-controls">
+          <button class="control-btn btn-close" onclick="window.api.closeWindow()"></button>
+        </div>
+      </div>
+
+      <!-- 2. 主体内容 (Grid 分为左右两栏) -->
+      <div class="main-body">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+          <div class="nav-item active">网易云音乐</div>
         </div>
 
-        <!-- 2. 主体内容 (Grid 分为左右两栏) -->
-        <div class="main-body">
-            
-            <!-- 左侧导航栏 -->
-            <div class="sidebar">
-                <div class="nav-item active">网易云音乐</div>
+        <!-- 右侧内容填充区 -->
+        <div class="content-area">
+          <!-- 搜索区域 -->
+          <div class="search-section">
+            <div class="search-row">
+              <input
+                type="text"
+                id="search-music"
+                class="solid-input search-input"
+                placeholder="在此处搜索网易云音乐..."
+              />
+              <button class="solid-btn search-btn" id="search_music_btn">🔍 搜索</button>
             </div>
+          </div>
 
-            <!-- 右侧内容填充区 -->
-            <div class="content-area">
-                
-                <!-- 搜索区域 -->
-                <div class="search-section">
-                    <div class="search-row">
-                        <input type="text" id="search-music" class="solid-input search-input" placeholder="在此处搜索网易云音乐..." />
-                        <button class="solid-btn search-btn" id="search_music_btn">🔍 搜索</button>
-                    </div>
-                </div>
-
-                <!-- 歌曲列表 -->
-                <div class="song-list-section">
-                    <div class="section-header">
-                        <span class="section-title">歌曲返回列表</span>
-                        <span class="song-count">共 0 首</span>
-                    </div>
-                    <div class="song-list">
-                        <div class="song-item placeholder-item">
-                            <span class="song-index">#</span>
-                            <span class="song-name">暂无歌曲</span>
-                            <span class="song-artist">-</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cookie 存储和操作区域 -->
-                <div class="cookie-section">
-                    <div class="cookie-header">
-                        <span class="cookie-title">📦 网易云 Music_Ucookie 存储区域</span>
-                    </div>
-                    <div class="cookie-content">
-                        <div class="cookie-display">
-                            <span class="cookie-placeholder">暂无 Cookie 数据</span>
-                        </div>
-                        <div class="cookie-actions">
-                            <button class="solid-btn cookie-btn save-btn">💾 保存</button>
-                            <button class="solid-btn cookie-btn share-btn">📤 分享</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 歌曲播放状态栏 -->
-                <div class="player-bar">
-                    <div class="player-info">
-                        <div class="player-cover">
-                            <span class="cover-placeholder">🎵</span>
-                        </div>
-                        <div class="player-song-detail">
-                            <div class="player-song-name">未在播放</div>
-                            <div class="player-artist-name">-</div>
-                        </div>
-                    </div>
-                    <div class="player-controls">
-                        <button class="player-btn" title="上一首">⏮</button>
-                        <button class="player-btn play-btn" title="播放/暂停">▶</button>
-                        <button class="player-btn" title="下一首">⏭</button>
-                    </div>
-                    <div class="player-progress">
-                        <span class="progress-time current-time">00:00</span>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        <span class="progress-time total-time">00:00</span>
-                    </div>
-                    <div class="player-volume">
-                        <button class="player-btn" title="音量">🔊</button>
-                    </div>
-                </div>
-
+          <!-- 歌曲列表 -->
+          <div class="song-list-section">
+            <div class="section-header">
+              <span class="section-title">歌曲返回列表</span>
+              <span class="song-count" id="songCount">共 0 首</span>
             </div>
+            <div class="song-list" id="songListContainer">
+              <!-- 占位内容会在 TS 中被替换 -->
+              <div class="song-item placeholder-item">
+                <span class="song-index">#</span>
+                <span class="song-name">暂无歌曲</span>
+                <span class="song-artist">-</span>
+              </div>
+            </div>
+          </div>
 
+          <!-- Cookie 存储和操作区域 -->
+          <div class="cookie-section">
+            <div class="cookie-header">
+              <span class="cookie-title">📦 网易云 Music_Ucookie 存储区域</span>
+            </div>
+            <div class="cookie-content">
+              <div class="cookie-display">
+                <span class="cookie-placeholder">暂无 Cookie 数据</span>
+              </div>
+              <div class="cookie-actions">
+                <button class="solid-btn cookie-btn save-btn">💾 保存</button>
+                <button class="solid-btn cookie-btn share-btn">📤 分享</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 歌曲播放状态栏 -->
+          <div class="player-bar">
+            <div class="player-info">
+              <div class="player-cover">
+                <span class="cover-placeholder">🎵</span>
+              </div>
+              <div class="player-song-detail">
+                <div class="player-song-name">未在播放</div>
+                <div class="player-artist-name">-</div>
+              </div>
+            </div>
+            <div class="player-controls">
+              <button class="player-btn" title="上一首">⏮</button>
+              <button class="player-btn play-btn" title="播放/暂停">▶</button>
+              <button class="player-btn" title="下一首">⏭</button>
+            </div>
+            <div class="player-progress">
+              <span class="progress-time current-time">00:00</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+              </div>
+              <span class="progress-time total-time">00:00</span>
+            </div>
+            <div class="player-volume">
+              <button class="player-btn" title="音量">🔊</button>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-
-</body>
-<link rel="stylesheet" href="assets/main.css">
-<script src="src/renderer.ts"></script>
+    <script src="src/renderer.ts"></script>
+  </body>
 </html>

@@ -1,19 +1,15 @@
 // renderer.ts
-// 导入 preload 中的类型
 import type { SearchResult } from '../../preload/index'
-
-// 不需要重复声明 Window 接口，因为 preload.ts 已经声明了
-// 但如果有类型冲突，可以这样扩展
 
 // DOM 元素
 const inputElement = document.getElementById('search-music') as HTMLInputElement | null
 const btnElement = document.getElementById('search_music_btn') as HTMLButtonElement | null
 
-// 定义歌曲数据类型（根据你的 JSON 结构）
+// 定义歌曲数据类型
 interface Song {
   id: number
   name: string
-  artists: string | string[] // 可能是字符串或数组
+  artists: string | string[]
   album: string
   picUrl: string
 }
@@ -34,8 +30,7 @@ function isApiAvailable(): boolean {
 }
 
 // 搜索处理函数
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-async function handleSearch(){
+async function handleSearch() {
   const searchText: string = inputElement?.value?.trim() || ''
   if (!searchText) {
     console.warn('请输入搜索关键词')
@@ -55,15 +50,17 @@ async function handleSearch(){
   }
 
   try {
-    // 使用 window.api.searchMusic，类型自动推断为 Promise<SearchResult[]>
-    const results = await window.api.searchMusic(searchText);
-    
-
-    
+    // 使用 window.api.searchMusic
+    const results = await window.api.searchMusic(searchText)
     console.log('收到搜索结果:', results)
-    processSearchResults(results)
-    
-    return results 
+
+    // ✅ 修正：传入数组，处理数据
+    const { names, artists ,ids } = processSearchResults(results)
+    console.log(`${names},${artists},${ids}`)
+    // ✅ 修正：传入处理好的数据渲染
+    renderProcessedResults(names, artists, ids)
+
+    return results
   } catch (error) {
     console.error('搜索失败:', error)
     alert('搜索失败，请重试')
@@ -75,9 +72,88 @@ async function handleSearch(){
   }
 }
 
-function processSearchResults(songs: unknown): void {
-  const allNames = songs.map(song => song.name);
-  const allArtists = songs.map(song => song.artists.split('/'));
-  const allIds = songs.map(song => song.id);
-  console.log(`${allNames},${allArtists},${allIds}`)
+// ✅ 修正：参数类型改为 Song[]（数组）
+function processSearchResults(songs: Song[]): {
+  names: string[]
+  artists: string[][]
+  ids: number[]
+} {
+  const allNames = songs.map((song) => song.name)
+  const allArtists = songs.map((song) => {
+    // 处理 artists 可能是字符串或数组
+    if (Array.isArray(song.artists)) {
+      return song.artists
+    } else {
+      return song.artists.split('/')
+    }
+  })
+  const allIds = songs.map((song) => song.id)
+
+  return {
+    names: allNames,
+    artists: allArtists,
+    ids: allIds
+  }
+}
+
+// 渲染函数
+// 渲染函数 - 补全版本
+function renderProcessedResults(names: string[], artists: string[][]): void {
+  const container = document.getElementById('songListContainer')
+  const countElement = document.getElementById('songCount')
+
+  if (!container) {
+    console.error('❌ 找不到容器 #songListContainer')
+    return
+  }
+
+  // 空状态判断
+  if (!names || !artists || names.length === 0 || artists.length === 0) {
+    container.innerHTML = `
+      <div class="song-item placeholder-item">
+        <span class="song-index">#</span>
+        <span class="song-name">暂无歌曲</span>
+        <span class="song-artist">-</span>
+      </div>
+    `
+    if (countElement) {
+      countElement.textContent = '共 0 首'
+    }
+    return
+  }
+
+  // 清空容器
+  container.innerHTML = ''
+
+  // 循环生成歌曲列表
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i]
+    const artistData = artists[i]
+    
+    // 处理歌手显示
+    let artistDisplay = '-'
+    if (Array.isArray(artistData)) {
+      artistDisplay = artistData.join(' / ')
+    } else if (artistData) {
+      artistDisplay = artistData
+    }
+
+    // 创建歌曲元素
+    const songDiv = document.createElement('div')
+    songDiv.className = 'song-item'
+    songDiv.setAttribute('data-index', String(i))
+    
+    songDiv.innerHTML = `
+      <span class="song-index">${i + 1}</span>
+      <span class="song-name">${name}</span>
+      <span class="song-artist">${artistDisplay}</span>
+    `
+    
+    container.appendChild(songDiv)
+  }
+
+  // 更新数量
+  if (countElement) {
+    countElement.textContent = `共 ${names.length} 首`
+  }
 }
