@@ -427,11 +427,21 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.player-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
 }
 
 .cover-placeholder {
     font-size: 20px;
     opacity: 0.5;
+    position: absolute;
 }
 
 .player-song-detail {
