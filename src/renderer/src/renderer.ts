@@ -5,6 +5,11 @@ interface Window {
     getMusicByIds: (musicIds: string) => Promise<unknown>
     getMusicLyric: (musicId: string) => Promise<unknown>
     getMusicUrl: (musicId: string, level?: string) => Promise<unknown>
+    downloadMusic: (musicId: number, songName: string, artistName: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
+    getShareUrl: (musicId: number) => Promise<{ url: string }>
+    setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
+    getCookie: () => Promise<{ cookie: string; masked: string }>
+    closeWindow: () => void
   }
 }
 
@@ -29,6 +34,7 @@ const playerCoverImg = document.getElementById('player-cover-img') as HTMLImageE
 const playerSongName = document.querySelector('.player-song-name') as HTMLElement | null
 const playerArtistName = document.querySelector('.player-artist-name') as HTMLElement | null
 const playButton = document.querySelector('.play-btn') as HTMLButtonElement | null
+const playIcon = document.getElementById('play-icon') as HTMLImageElement | null
 const prevButton = document.querySelector('.prev-btn') as HTMLButtonElement | null
 const nextButton = document.querySelector('.next-btn') as HTMLButtonElement | null
 const progressBar = document.querySelector('.progress-bar') as HTMLElement | null
@@ -83,7 +89,7 @@ async function handleSearch(): Promise<void> {
     console.error('搜索失败:', error)
   } finally {
     if (btnElement) {
-      btnElement.textContent = '搜索'
+      btnElement.innerHTML = '<img src="./assets/icons/search.svg" class="icon-svg icon-btn" alt="" />搜索'
       btnElement.disabled = false
     }
   }
@@ -114,7 +120,7 @@ function renderProcessedResults(names: string[], artists: string[][], ids: numbe
   const countElement = document.getElementById('songCount')
 
   if (!container) {
-    console.error('❌ 找不到容器 #songListContainer')
+    console.error('找不到容器 #songListContainer')
     return
   }
 
@@ -157,20 +163,6 @@ function renderProcessedResults(names: string[], artists: string[][], ids: numbe
   }
 }
 
-function outputMusicDetail(detail: unknown): void {
-  console.log('🎵 主进程返回的音乐详情:', detail)
-
-  let detailOutputElement = document.getElementById('music-detail-output') as HTMLPreElement | null
-  if (!detailOutputElement) {
-    detailOutputElement = document.createElement('pre')
-    detailOutputElement.id = 'music-detail-output'
-    detailOutputElement.style.cssText = 'white-space: pre-wrap; margin-top: 12px; font-size: 12px; max-height: 220px; overflow: auto;'
-    document.body.appendChild(detailOutputElement)
-  }
-
-  detailOutputElement.textContent = JSON.stringify(detail, null, 2)
-}
-
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) {
     return '00:00'
@@ -200,8 +192,8 @@ function extractAudioUrl(response: unknown): string | null {
 }
 
 function updatePlayButton(): void {
-  if (!playButton) return
-  playButton.textContent = isPlaying ? '⏸' : '▶'
+  if (!playIcon) return
+  playIcon.src = isPlaying ? './assets/icons/pause.svg' : './assets/icons/play.svg'
 }
 
 function setActiveSong(index: number): void {
@@ -277,7 +269,6 @@ async function loadAndPlaySong(index: number): Promise<void> {
     updatePlayButton()
   } catch (error) {
     console.error('播放失败:', error)
-    
   }
 }
 
@@ -377,3 +368,187 @@ container?.addEventListener('click', async (event) => {
 
   await loadAndPlaySong(index)
 })
+
+// ================== 关闭窗口 ==================
+const closeBtn = document.getElementById('window-close-btn') as HTMLButtonElement | null
+closeBtn?.addEventListener('click', () => {
+  window.api.closeWindow()
+})
+
+// ================== 下载功能 ==================
+const downloadBtn = document.querySelector('.save-btn') as HTMLButtonElement | null
+downloadBtn?.addEventListener('click', async () => {
+  if (currentIndex < 0 || currentIndex >= currentResults.length) {
+    alert('请先选择一首歌曲')
+    return
+  }
+
+  const song = currentResults[currentIndex]
+  if (!isApiAvailable()) {
+    alert('API 未初始化，请重启应用')
+    return
+  }
+
+  downloadBtn.textContent = '下载中...'
+  downloadBtn.disabled = true
+
+  try {
+    const result = await window.api.downloadMusic(
+      song.id,
+      song.name,
+      Array.isArray(song.artists) ? song.artists.join('/') : song.artists
+    )
+
+    if (result.success) {
+      alert('下载成功!\n保存位置: ' + (result.filePath || ''))
+    } else {
+      alert('下载失败: ' + (result.error || '未知错误'))
+    }
+  } catch (error) {
+    console.error('下载失败:', error)
+    alert('下载失败: ' + String(error))
+  } finally {
+    downloadBtn.textContent = '保存'
+    downloadBtn.disabled = false
+  }
+})
+
+// ================== 分享功能 (复制歌曲源链接) ==================
+const shareBtn = document.getElementById('share-music-btn') as HTMLButtonElement | null
+shareBtn?.addEventListener('click', async () => {
+  if (currentIndex < 0 || currentIndex >= currentResults.length) {
+    alert('请先选择一首歌曲')
+    return
+  }
+
+  const song = currentResults[currentIndex]
+  if (!isApiAvailable()) {
+    alert('API 未初始化，请重启应用')
+    return
+  }
+
+  shareBtn.textContent = '获取中...'
+  shareBtn.disabled = true
+
+  try {
+    const response = await window.api.getMusicUrl(song.id)
+    const audioUrl = extractAudioUrl(response)
+
+    if (audioUrl) {
+      await navigator.clipboard.writeText(audioUrl)
+      alert('歌曲源链接已复制到剪贴板!\n\n歌曲: ' + song.name)
+    } else {
+      throw new Error('未能获取播放地址')
+    }
+  } catch (error) {
+    console.error('获取分享链接失败:', error)
+    alert('获取源链接失败，请确认已设置有效的 Cookie')
+  } finally {
+    shareBtn.innerHTML = '<img src="./assets/icons/share.svg" class="icon-svg icon-btn" alt="" />分享'
+    shareBtn.disabled = false
+  }
+})
+
+// ================== Cookie 管理 ==================
+const cookieInput = document.getElementById('cookie-input') as HTMLInputElement | null
+const cookieSaveBtn = document.getElementById('cookie-save-btn') as HTMLButtonElement | null
+const cookieStatus = document.getElementById('cookie-status') as HTMLElement | null
+
+// 初始化加载 Cookie 状态
+async function initCookieDisplay(): Promise<void> {
+  if (!isApiAvailable()) return
+  try {
+    const result = await window.api.getCookie()
+    if (result.masked) {
+      updateCookieStatus(result.masked, true)
+    }
+  } catch {
+    // ignore
+  }
+}
+
+function updateCookieStatus(masked: string, hasCookie: boolean): void {
+  if (!cookieStatus) return
+  if (hasCookie) {
+    cookieStatus.textContent = '已设置: ' + masked
+    cookieStatus.className = 'cookie-status'
+  } else {
+    cookieStatus.textContent = '未设置'
+    cookieStatus.className = 'cookie-status empty'
+  }
+}
+
+cookieSaveBtn?.addEventListener('click', async () => {
+  const value = cookieInput?.value?.trim() || ''
+  if (!value) {
+    alert('请输入 Cookie 值')
+    return
+  }
+
+  cookieSaveBtn.textContent = '保存中...'
+  cookieSaveBtn.disabled = true
+
+  try {
+    const result = await window.api.setCookie(value)
+    if (result.success) {
+      updateCookieStatus(result.masked, true)
+      if (cookieInput) cookieInput.value = ''
+    }
+  } catch (error) {
+    alert('Cookie 保存失败: ' + String(error))
+  } finally {
+    cookieSaveBtn.textContent = '保存'
+    cookieSaveBtn.disabled = false
+  }
+})
+
+void initCookieDisplay()
+
+// ================== 音量控制 ==================
+const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement | null
+const volumeBtn = document.getElementById('volume-btn') as HTMLButtonElement | null
+const volumeIcon = document.getElementById('volume-icon') as HTMLImageElement | null
+
+let lastVolume = 80
+let isMuted = false
+
+if (volumeSlider && audioElement) {
+  audioElement.volume = Number(volumeSlider.value) / 100
+
+  volumeSlider.addEventListener('input', () => {
+    const vol = Number(volumeSlider.value) / 100
+    audioElement.volume = vol
+    if (vol > 0) {
+      isMuted = false
+      lastVolume = Number(volumeSlider.value)
+    }
+    updateVolumeIcon()
+  })
+}
+
+volumeBtn?.addEventListener('click', () => {
+  if (!audioElement || !volumeSlider) return
+
+  if (isMuted) {
+    // 取消静音
+    volumeSlider.value = String(lastVolume)
+    audioElement.volume = lastVolume / 100
+    isMuted = false
+  } else {
+    // 静音
+    lastVolume = Number(volumeSlider.value)
+    volumeSlider.value = '0'
+    audioElement.volume = 0
+    isMuted = true
+  }
+  updateVolumeIcon()
+})
+
+function updateVolumeIcon(): void {
+  if (!volumeIcon) return
+  if (isMuted || (volumeSlider && Number(volumeSlider.value) === 0)) {
+    volumeIcon.src = './assets/icons/volume-mute.svg'
+  } else {
+    volumeIcon.src = './assets/icons/volume.svg'
+  }
+}

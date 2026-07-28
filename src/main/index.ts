@@ -1,7 +1,8 @@
 // src/main/index.ts
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { createCipheriv, createHash } from 'crypto'
+import { createWriteStream, existsSync, mkdirSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
@@ -16,9 +17,11 @@ interface SongInfo {
 }
 
 // ================== Cookie 与加密辅助 ==================
+let userCookie: string = ''
+
 function getMusicCookies(): Record<string, string> {
   return {
-    MUSIC_U: '0033A7C2605FEDE9A064B6B8C7F3E5B13708EF294DE512DABE74300EF86EE92A9173CA7669DB914F781C481ADA77E2C4049A0A7FC70BDE38EE8F613929C1C752822B49E50FEC5B939826B32A87AAC0B8EE624D1A00B76FDE1A1FF8121ACEC211B659A57A88314BBDCFB0514DE75AC0FEC9CB8299A88BEDFAE33108C9D9BBFAB15C84C82B7A65D1CEA4AE50F07B39B2B216FFE3B42BDBA570477EB6902B760A54CF912D08752CA18B54F97F0FE8F3DBE69C3BF7C8AEE5EC0115BB18880AAE6438DE2261975C69A43B06F465A0489676FAB59B54EE3E10C629B31980C23585AB95495B8EAD07808C70A7B954AA4944973CB5D4C9F5BEF30740736018AA4901E463E8045960C1EEF7874620D794BE3A65500F5AF8EEF225ADA3C2A3D9C9F5BB4235147F835E198F09F8EBEAD26E8D4A41C6347192A77F74E26BA38F5D4EBD90368A97CFF8FB35AA7DA64C0462FC88C335D09EA9A3CA5325618300A59FDD7A00C045A4E6155BE55525C86803A6F95E2CAEB1AE',
+    MUSIC_U: userCookie,
     os: 'pc',
     appver: '8.9.75',
     osver: '',
@@ -179,6 +182,81 @@ async function getSongUrl(musicId: number | string, level: string = 'sky'): Prom
   return response.data
 }
 
+// ================== 下载音乐文件 ==================
+async function downloadMusic(
+  musicId: number,
+  songName: string,
+  artistName: string
+): Promise<{ success: boolean; filePath?: string; error?: string }> {
+  try {
+    // 1. 获取播放地址
+    const urlResponse = await getSongUrl(musicId, 'sky')
+    const audioUrl = extractSongUrl(urlResponse)
+
+    if (!audioUrl) {
+      // 尝试标准音质
+      const urlResponse2 = await getSongUrl(musicId, 'standard')
+      const audioUrl2 = extractSongUrl(urlResponse2)
+      if (!audioUrl2) {
+        return { success: false, error: '无法获取歌曲播放地址，可能需要 VIP' }
+      }
+      return downloadFromUrl(audioUrl2, songName, artistName)
+    }
+
+    return downloadFromUrl(audioUrl, songName, artistName)
+  } catch (error) {
+    return { success: false, error: `下载失败: ${String(error)}` }
+  }
+}
+
+async function downloadFromUrl(
+  audioUrl: string,
+  songName: string,
+  artistName: string
+): Promise<{ success: boolean; filePath?: string; error?: string }> {
+  // 弹出保存对话框
+  const safeFileName = `${songName} - ${artistName}`.replace(/[<>:"/\\|?*]/g, '_')
+  const { filePath, canceled } = await dialog.showSaveDialog({
+    title: '保存音乐文件',
+    defaultPath: `${safeFileName}.mp3`,
+    filters: [
+      { name: '音频文件', extensions: ['mp3', 'm4a', 'flac'] },
+      { name: '所有文件', extensions: ['*'] }
+    ]
+  })
+
+  if (canceled || !filePath) {
+    return { success: false, error: '用户取消了下载' }
+  }
+
+  // 下载文件
+  const response = await axios.get(audioUrl, {
+    responseType: 'stream',
+    headers: {
+      'User-Agent': 'Mozilla/5.0',
+      Referer: 'https://music.163.com/'
+    },
+    timeout: 60000
+  })
+
+  const writer = createWriteStream(filePath)
+  response.data.pipe(writer)
+
+  return new Promise((resolve) => {
+    writer.on('finish', () => {
+      resolve({ success: true, filePath })
+    })
+    writer.on('error', (err) => {
+      resolve({ success: false, error: `写入文件失败: ${err.message}` })
+    })
+  })
+}
+
+// ================== 获取分享链接 ==================
+function getShareUrl(musicId: number): string {
+  return `https://music.163.com/song?id=${musicId}`
+}
+
 // ================== 注册 IPC 处理器 ==================
 // 重要：必须在 app.whenReady() 之前或之后注册，但不能在渲染进程加载之后
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -244,16 +322,55 @@ function registerIpcHandlers() {
   })
 
   ipcMain.handle('get-music-url', async (_event, { musicId, level = 'sky' }) => {
-    if (!musicId) {
+    const id = String(musicId)
+    if (!id || id === '') {
       throw new Error('musicId 不能为空')
     }
-    return getSongUrl(musicId, level)
+    return getSongUrl(id, level)
+  })
+
+  ipcMain.handle('get-music-url-by-id', async (_event, { musicId, level = 'sky' }: { musicId: number; level?: string }) => {
+    const id = String(musicId)
+    if (!id || id === '') {
+      throw new Error('musicId 不能为空')
+    }
+    return getSongUrl(id, level)
   })
 
   // 关闭窗口
   ipcMain.on('close', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (win) win.close()
+  })
+
+  // 下载音乐文件
+  ipcMain.handle('download-music', async (_event, { musicId, songName, artistName }: { musicId: number; songName: string; artistName: string }) => {
+    console.log('⬇ 收到下载请求:', songName, '-', artistName)
+    if (!musicId) {
+      return { success: false, error: 'musicId 不能为空' }
+    }
+    return downloadMusic(musicId, songName, artistName)
+  })
+
+  // 获取分享链接
+  ipcMain.handle('get-share-url', async (_event, { musicId }: { musicId: number }) => {
+    console.log('🔗 获取分享链接:', musicId)
+    if (!musicId) {
+      throw new Error('musicId 不能为空')
+    }
+    return { url: getShareUrl(musicId) }
+  })
+
+  // 设置 Cookie
+  ipcMain.handle('set-cookie', async (_event, { cookie }: { cookie: string }) => {
+    console.log('🍪 设置 Cookie')
+    userCookie = cookie.trim()
+    return { success: true, masked: userCookie ? userCookie.slice(0, 8) + '...' : '(空)' }
+  })
+
+  // 获取当前 Cookie（脱敏显示）
+  ipcMain.handle('get-cookie', async () => {
+    return { cookie: userCookie, masked: userCookie ? userCookie.slice(0, 8) + '...' + userCookie.slice(-4) : '' }
   })
 
   console.log('✅ IPC 处理器注册完成')

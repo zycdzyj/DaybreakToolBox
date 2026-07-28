@@ -19,6 +19,30 @@ const api = {
 
   getMusicUrl: (musicId: string, level: string = 'sky') => {
     return ipcRenderer.invoke('get-music-url', { musicId, level })
+  },
+
+  // 下载音乐文件到本地
+  downloadMusic: (musicId: number, songName: string, artistName: string) => {
+    return ipcRenderer.invoke('download-music', { musicId, songName, artistName })
+  },
+
+  // 获取分享链接
+  getShareUrl: (musicId: number) => {
+    return ipcRenderer.invoke('get-share-url', { musicId })
+  },
+
+  // Cookie 管理
+  setCookie: (cookie: string) => {
+    return ipcRenderer.invoke('set-cookie', { cookie })
+  },
+
+  getCookie: () => {
+    return ipcRenderer.invoke('get-cookie')
+  },
+
+  // 关闭窗口
+  closeWindow: () => {
+    ipcRenderer.send('close')
   }
 }
 
@@ -42,10 +66,11 @@ declare global {
       getMusicByIds: (musicIds: string) => Promise<unknown>
       getMusicLyric: (musicId: string) => Promise<unknown>
       getMusicUrl: (musicId: string, level?: string) => Promise<unknown>
-      playMusic: (musicId: number) => Promise<void>
-      getMusicList: () => Promise<MusicItem[]>
+      downloadMusic: (musicId: number, songName: string, artistName: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
+      getShareUrl: (musicId: number) => Promise<{ url: string }>
+      setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
+      getCookie: () => Promise<{ cookie: string; masked: string }>
       closeWindow: () => void
-      onSearchProgress: (callback: (data: any) => void) => () => void
     }
   }
 }

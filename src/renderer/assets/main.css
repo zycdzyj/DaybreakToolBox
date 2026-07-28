@@ -17,6 +17,50 @@ body {
     overflow: hidden;
 }
 
+/* --- SVG 图标通用 --- */
+.icon-svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.icon-close {
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.control-btn:hover .icon-close {
+    opacity: 1;
+}
+
+.icon-nav {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+}
+
+.icon-btn {
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+}
+
+.icon-ctrl {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-play {
+    width: 18px;
+    height: 18px;
+}
+
+.icon-vol {
+    width: 16px;
+    height: 16px;
+}
+
 /* --- 整体布局 Grid --- */
 .app-container {
     width: 900px;
@@ -31,7 +75,7 @@ body {
     overflow: hidden;
 }
 
-/* --- 1. 顶部标题栏 (macOS 风格) --- */
+/* --- 1. 顶部标题栏 --- */
 .title-bar {
     grid-row: 1 / 2;
     display: flex;
@@ -57,9 +101,9 @@ body {
     display: flex;
     gap: 8px;
     -webkit-app-region: no-drag;
+    margin-left: auto;
 }
 
-/* macOS 风格红绿灯按钮 */
 .control-btn {
     width: 12px;
     height: 12px;
@@ -68,20 +112,17 @@ body {
     cursor: pointer;
     transition: opacity 0.2s;
     padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .control-btn:hover {
     opacity: 0.8;
 }
 
-.btn-close { 
-    background: #ff5f56; 
-}
-.btn-min { 
-    background: #ffbd2e; 
-}
-.btn-max { 
-    background: #27c93f; 
+.btn-close {
+    background: #ff5f56;
 }
 
 /* --- 2. 主体内容区 --- */
@@ -115,6 +156,9 @@ body {
     font-size: 13px;
     color: #999999;
     background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .nav-item:hover {
@@ -122,10 +166,18 @@ body {
     color: #ffffff;
 }
 
+.nav-item:hover .icon-nav {
+    opacity: 1;
+}
+
 .nav-item.active {
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     color: #ffffff;
+}
+
+.nav-item.active .icon-nav {
+    opacity: 1;
 }
 
 /* 内容区域 */
@@ -186,11 +238,20 @@ body {
     padding: 0 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .search-btn:hover {
     background: #2a2a2a;
     border-color: #3a3a3a;
+}
+
+.search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* --- 歌曲列表 (关键修复区域) --- */
@@ -312,66 +373,72 @@ body {
     color: #444444;
 }
 
-/* --- Cookie 存储区域 --- */
+/* --- Cookie 设置区域 --- */
 .cookie-section {
     background: #0a0a0a;
     border-radius: 12px;
     border: 1px solid #1a1a1a;
-    padding: 15px;
-    flex-shrink: 0; /* 防止被压缩 */
+    padding: 12px 15px;
+    flex-shrink: 0;
 }
 
 .cookie-header {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .cookie-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    color: #cccccc;
+    color: #888888;
 }
 
 .cookie-content {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 15px;
-    align-items: center;
-}
-
-.cookie-display {
-    padding: 10px 14px;
-    background: #1a1a1a;
-    border-radius: 8px;
-    border: 1px solid #2a2a2a;
-    min-height: 36px;
     display: flex;
+    gap: 10px;
     align-items: center;
 }
 
-.cookie-placeholder {
-    color: #444444;
-    font-size: 13px;
-    font-style: italic;
+.cookie-input-field {
+    flex: 1;
+    height: 34px;
+    font-size: 12px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 0 10px;
+    outline: none;
+    font-family: monospace;
+    transition: border-color 0.2s;
+}
+
+.cookie-input-field:focus {
+    border-color: #4a4a4a;
+}
+
+.cookie-input-field::placeholder {
+    color: #555555;
+    font-size: 11px;
 }
 
 .cookie-actions {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .cookie-btn {
-    height: 36px;
-    padding: 0 16px;
+    height: 34px;
+    padding: 0 14px;
     font-size: 12px;
-    border-radius: 8px;
+    border-radius: 6px;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
     color: #cccccc;
-    min-width: 60px;
-    white-space: nowrap;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .cookie-btn:hover {
@@ -379,20 +446,17 @@ body {
     color: #ffffff;
 }
 
-.save-btn {
-    background: #1a1a1a;
+.cookie-status {
+    font-size: 11px;
+    color: #4CAF50;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.save-btn:hover {
-    background: #2a2a2a;
-}
-
-.share-btn {
-    background: #1a1a1a;
-}
-
-.share-btn:hover {
-    background: #2a2a2a;
+.cookie-status.empty {
+    color: #555555;
 }
 
 /* --- 歌曲播放状态栏 --- */
@@ -438,9 +502,10 @@ body {
     display: none;
 }
 
-.cover-placeholder {
-    font-size: 20px;
-    opacity: 0.5;
+.cover-placeholder-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.4;
     position: absolute;
 }
 
@@ -473,19 +538,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .player-btn {
     background: transparent;
     border: none;
     color: #999999;
-    font-size: 18px;
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 6px;
     border-radius: 6px;
     transition: all 0.2s;
-    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .player-btn:hover {
@@ -494,17 +560,13 @@ body {
 }
 
 .play-btn {
-    font-size: 22px;
     color: #ffffff;
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
-    padding: 6px 12px;
+    padding: 8px;
     border-radius: 50%;
     width: 36px;
     height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .play-btn:hover {
@@ -573,10 +635,49 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 8px;
 }
 
-.player-volume .player-btn {
-    font-size: 16px;
+.volume-btn {
+    padding: 4px;
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 4px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    transition: height 0.2s;
+}
+
+.volume-slider:hover {
+    height: 6px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.volume-slider:hover::-webkit-slider-thumb {
+    opacity: 1;
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: transparent;
 }
 
 /* --- 播放状态栏动画 --- */
