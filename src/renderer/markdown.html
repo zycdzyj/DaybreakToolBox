@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Markdown 编辑器 - 破晓工具箱</title>
+    <link rel="stylesheet" href="assets/main.css" />
+    <link rel="stylesheet" href="assets/markdown.css" />
+    <!-- Cherry Markdown 样式 -->
+    <link rel="stylesheet" href="assets/cherry-markdown.min.css" />
+  </head>
+  <body>
+    <!-- 整体容器 -->
+    <div class="app-container">
+      <!-- 1. 顶部标题栏 -->
+      <div class="title-bar">
+        <div class="window-title">破晓工具箱</div>
+        <div class="window-controls">
+          <button class="control-btn btn-close" id="window-close-btn">
+            <img src="./assets/icons/close.svg" class="icon-svg icon-close" alt="关闭" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 主体内容 -->
+      <div class="main-body">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+          <a href="index.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item">
+              网易云音乐
+            </div>
+          </a>
+          <a href="cryptoPage.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item">
+              文本加解密
+            </div>
+          </a>
+          <a href="markdown.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item active">
+              Markdown 编辑器
+            </div>
+          </a>
+        </div>
+
+        <!-- 右侧内容填充区 -->
+        <div class="content-area">
+          <div class="markdown-section">
+            <!-- 编辑器面板 -->
+            <div class="markdown-panel">
+              <div class="panel-title">
+                <span>Markdown 编辑器</span>
+                <div class="panel-tools">
+                  <button class="panel-tool-btn" id="export-btn">导出 HTML</button>
+                  <button class="panel-tool-btn" id="copy-btn">复制</button>
+                  <button class="panel-tool-btn" id="clear-btn">清空</button>
+                </div>
+              </div>
+              <!-- Cherry Markdown 挂载点 -->
+              <div id="markdown-editor" class="markdown-editor"></div>
+              <!-- 底部状态栏 -->
+              <div class="markdown-footer">
+                <span class="footer-info" id="footer-info">字数：0</span>
+                <span class="footer-info" id="footer-status"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cherry Markdown -->
+    <script src="src/cherry-markdown.min.js"></script>
+    <!-- 页面脚本（当前为空，后续逻辑在此实现） -->
+    <script src="./src/markdown.js"></script>
+    <script>
+      // ============ Markdown 编辑器初始化 ============
+
+      // 默认示例内容
+      const defaultContent = `# 欢迎使用 Markdown 编辑器
+
+这是一个基于 **Cherry Markdown** 的在线编辑器。
+
+## 功能特性
+
+- 支持 **加粗**、*斜体*、~~删除线~~
+- 支持 \`行内代码\` 和代码块
+- 支持 [链接](https://github.com/Tencent/cherry-markdown)
+- 支持表格、列表、引用等
+
+## 代码示例
+
+\`\`\`javascript
+function hello() {
+  console.log('Hello, Markdown!');
+}
+\`\`\`
+
+> 开始你的创作吧！
+`;
+
+      const editorEl = document.getElementById('markdown-editor');
+      const footerInfo = document.getElementById('footer-info');
+      const footerStatus = document.getElementById('footer-status');
+
+      // 初始化 Cherry Markdown
+      let editor = null;
+
+      try {
+        editor = new Cherry({
+          id: 'markdown-editor',
+          value: defaultContent,
+          autoScrollByCursor: true,
+          defaultModel: 'editPreview',
+          editorMode: 'editPreview',
+          toolbars: {
+            toolbar: [
+              'bold',
+              'italic',
+              'strikethrough',
+              'underline',
+              'header1',
+              'header2',
+              'header3',
+              '|',
+              'ol',
+              'ul',
+              'list',
+              '|',
+              'justifyLeft',
+              'justifyCenter',
+              'justifyRight',
+              '|',
+              'link',
+              'image',
+              'table',
+              'blockquote',
+              'code',
+              'inlineCode',
+              '|',
+              'undo',
+              'redo',
+              '|',
+              'preview',
+              'sidePreview',
+              'togglePreview',
+              'export',
+            ],
+            bubble: ['bold', 'italic', 'strikethrough', 'underline', 'link', 'image', 'code'],
+            float: ['bold', 'italic', 'strikethrough', 'underline', 'link', 'image', 'code'],
+          },
+          fileUpload: (file, callback) => {
+            // 本地图片转 Base64 预览（简单实现）
+            const reader = new FileReader();
+            reader.onload = (e) => callback(e.target.result);
+            reader.readAsDataURL(file);
+          },
+        });
+
+        // 更新字数统计
+        const updateCount = () => {
+          const text = editor.getMarkdown() || '';
+          footerInfo.textContent = '字数：' + text.length;
+        };
+
+        // 监听内容变化（Cherry 没有直接的事件，通过定时器或重写）
+        const originalSetValue = editor.setValue.bind(editor);
+        editor.setValue = (...args) => {
+          originalSetValue(...args);
+          updateCount();
+        };
+
+        updateCount();
+
+        // 导出 HTML
+        document.getElementById('export-btn').addEventListener('click', () => {
+          const html = editor.getHtml();
+          const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'markdown.html';
+          a.click();
+          URL.revokeObjectURL(url);
+          footerStatus.textContent = '已导出 HTML';
+          setTimeout(() => (footerStatus.textContent = ''), 2000);
+        });
+
+        // 复制
+        document.getElementById('copy-btn').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(editor.getMarkdown());
+            footerStatus.textContent = '已复制 ✓';
+            setTimeout(() => (footerStatus.textContent = ''), 2000);
+          } catch (e) {
+            footerStatus.textContent = '复制失败';
+          }
+        });
+
+        清空
+        document.getElementById('clear-btn').addEventListener('click', () => {
+          editor.setMarkdown('');
+          updateCount();
+          footerStatus.textContent = '已清空';
+          setTimeout(() => (footerStatus.textContent = ''), 2000);
+        });
+      } catch (e) {
+        console.error('Cherry Markdown 初始化失败:', e);
+        editorEl.innerHTML = '<div style="padding: 20px; color: #f44336;">Markdown 编辑器加载失败，请检查网络连接。</div>';
+      }
+
+      // 窗口关闭按钮
+      document.getElementById('window-close-btn').addEventListener('click', () => {
+        if (window.close) window.close();
+      });
+    </script>
+  </body>
+</html>

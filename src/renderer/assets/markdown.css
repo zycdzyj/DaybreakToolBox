@@ -1,0 +1,198 @@
+/* ============ Markdown 编辑器页面专用样式 ============ */
+/* 与 main.css 的深色主题风格保持一致 */
+
+/* Markdown 内容区域 */
+.markdown-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.markdown-panel {
+    background: #0a0a0a;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* 面板标题栏 */
+.markdown-panel .panel-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #888888;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-bottom: 1px solid #1a1a1a;
+    flex-shrink: 0;
+}
+
+.panel-tools {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.panel-tool-btn {
+    height: 26px;
+    padding: 0 10px;
+    font-size: 11px;
+    border-radius: 6px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    color: #888888;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.panel-tool-btn:hover {
+    color: #ffffff;
+    background: #2a2a2a;
+}
+
+/* Cherry Markdown 编辑器容器 */
+.markdown-editor {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #0a0a0a;
+}
+
+/* 编辑器内部高度撑满 */
+.markdown-editor .cherry-editor {
+    height: 100%;
+}
+
+/* Cherry Markdown 深色主题覆盖 */
+.markdown-editor .cherry {
+    --cherry-main-color: #4a4a4a;
+    --cherry-border-color: #1a1a1a;
+    --cherry-bgcolor: #0a0a0a;
+    --cherry-bgcolor-light: #1a1a1a;
+    --cherry-bgcolor-dark: #0a0a0a;
+    --cherry-text-color: #cccccc;
+    --cherry-text-color-light: #888888;
+    --cherry-text-color-dark: #ffffff;
+}
+
+/* 工具栏 */
+.markdown-editor .cherry-toolbar {
+    background: #141414 !important;
+    border-bottom: 1px solid #1a1a1a !important;
+    padding: 6px 8px !important;
+}
+
+.markdown-editor .cherry-toolbar .cherry-toolbar-item {
+    color: #888888 !important;
+}
+
+.markdown-editor .cherry-toolbar .cherry-toolbar-item:hover {
+    color: #ffffff !important;
+    background: #2a2a2a !important;
+}
+
+/* 编辑区 */
+.markdown-editor .cherry-editor--mode-wysiwyg,
+.markdown-editor .cherry-editor--mode-preview,
+.markdown-editor .cherry-editor--mode-split {
+    background: #0a0a0a !important;
+}
+
+.markdown-editor .cherry-editor .CodeMirror {
+    background: #0a0a0a !important;
+    color: #cccccc !important;
+}
+
+/* 预览区 */
+.markdown-editor .cherry-previewer {
+    background: #0a0a0a !important;
+    color: #cccccc !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown {
+    color: #cccccc !important;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown h1,
+.markdown-editor .cherry-previewer .cherry-markdown h2,
+.markdown-editor .cherry-previewer .cherry-markdown h3,
+.markdown-editor .cherry-previewer .cherry-markdown h4,
+.markdown-editor .cherry-previewer .cherry-markdown h5,
+.markdown-editor .cherry-previewer .cherry-markdown h6 {
+    color: #ffffff !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown code {
+    background: #1a1a1a !important;
+    color: #4fc3f7 !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown pre {
+    background: #1a1a1a !important;
+    border: 1px solid #2a2a2a !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown blockquote {
+    border-left-color: #4a4a4a !important;
+    color: #999999 !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown a {
+    color: #4fc3f7 !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown table {
+    border-color: #2a2a2a !important;
+}
+
+.markdown-editor .cherry-previewer .cherry-markdown th,
+.markdown-editor .cherry-previewer .cherry-markdown td {
+    border-color: #2a2a2a !important;
+    background: #0a0a0a !important;
+}
+
+/* 底部状态栏 */
+.markdown-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 15px;
+    border-top: 1px solid #1a1a1a;
+    background: #141414;
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
+}
+
+.markdown-footer .footer-info {
+    font-size: 11px;
+    color: #666666;
+}
+
+/* 滚动条美化 */
+.markdown-editor::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.markdown-editor::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.markdown-editor::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 3px;
+}
+
+.markdown-editor::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+}

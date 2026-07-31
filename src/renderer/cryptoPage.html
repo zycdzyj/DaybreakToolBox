@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>文本加解密 - 破晓工具箱</title>
+    <link rel="stylesheet" href="assets/main.css" />
+    <style>
+      /* ============ 加解密页面专用样式 ============ */
+
+      /* 输入输出区域 */
+      .crypto-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .crypto-panel {
+        background: #0a0a0a;
+        border-radius: 12px;
+        border: 1px solid #1a1a1a;
+        padding: 12px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .crypto-panel .panel-title {
+        font-size: 12px;
+        font-weight: 500;
+        color: #888888;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* 算法选择 */
+      .algo-select-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .algo-label {
+        font-size: 12px;
+        color: #888888;
+        white-space: nowrap;
+      }
+
+      .algo-select {
+        flex: 1;
+        min-width: 160px;
+        height: 34px;
+        font-size: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        color: #ffffff;
+        border-radius: 6px;
+        padding: 0 10px;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 28px;
+      }
+
+      .algo-select:focus {
+        border-color: #4a4a4a;
+      }
+
+      .algo-select option {
+        background: #1a1a1a;
+        color: #ffffff;
+      }
+
+      /* 模式切换 加解密 */
+      .mode-toggle {
+        display: flex;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 3px;
+      }
+
+      .mode-btn {
+        flex: 1;
+        height: 30px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: #888888;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .mode-btn:hover {
+        color: #ffffff;
+      }
+
+      .mode-btn.active {
+        background: #2a2a2a;
+        color: #ffffff;
+      }
+
+      .mode-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* 文本输入输出 */
+      .crypto-textarea {
+        width: 100%;
+        min-height: 90px;
+        flex: 1;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13px;
+        font-family: "Consolas", "Courier New", monospace;
+        outline: none;
+        resize: vertical;
+        line-height: 1.5;
+        transition: border-color 0.2s;
+      }
+
+      .crypto-textarea:focus {
+        border-color: #4a4a4a;
+        background: #222222;
+      }
+
+      .crypto-textarea::placeholder {
+        color: #555555;
+        font-size: 12px;
+      }
+
+      /* 密钥输入区 (AES/DES 等) */
+      .secret-row {
+        display: none;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .secret-row.visible {
+        display: flex;
+      }
+
+      .secret-input {
+        flex: 1;
+        height: 34px;
+        font-size: 12px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        color: #ffffff;
+        border-radius: 6px;
+        padding: 0 10px;
+        outline: none;
+        font-family: monospace;
+        transition: border-color 0.2s;
+      }
+
+      .secret-input:focus {
+        border-color: #4a4a4a;
+      }
+
+      .secret-input::placeholder {
+        color: #555555;
+        font-size: 11px;
+      }
+
+      /* 操作按钮行 */
+      .crypto-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .crypto-btn {
+        height: 36px;
+        padding: 0 18px;
+        font-size: 13px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        color: #cccccc;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .crypto-btn:hover {
+        background: #2a2a2a;
+        color: #ffffff;
+        border-color: #3a3a3a;
+      }
+
+      .crypto-btn.primary {
+        background: #1d4ed8;
+        border-color: #2563eb;
+        color: #ffffff;
+      }
+
+      .crypto-btn.primary:hover {
+        background: #2563eb;
+      }
+
+      .crypto-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* 输出区 */
+      .output-panel {
+        flex: 1;
+        min-height: 0;
+      }
+
+      .output-area {
+        min-height: 150px;
+        flex: 1;
+      }
+
+      /* 复制按钮 */
+      .copy-btn {
+        height: 26px;
+        padding: 0 10px;
+        font-size: 11px;
+        border-radius: 6px;
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        color: #888888;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .copy-btn:hover {
+        color: #ffffff;
+        background: #2a2a2a;
+      }
+
+      /* 状态提示 */
+      .crypto-status {
+        font-size: 11px;
+        color: #4CAF50;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .crypto-status.error {
+        color: #f44336;
+      }
+
+      .crypto-status.empty {
+        color: #555555;
+      }
+
+      /* 结果计数 */
+      .result-count {
+        font-size: 11px;
+        color: #666666;
+      }
+
+      /* 滚动条美化 */
+      .crypto-textarea::-webkit-scrollbar,
+      .output-area::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .crypto-textarea::-webkit-scrollbar-track,
+      .output-area::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .crypto-textarea::-webkit-scrollbar-thumb,
+      .output-area::-webkit-scrollbar-thumb {
+        background: #2a2a2a;
+        border-radius: 3px;
+      }
+
+      .crypto-textarea::-webkit-scrollbar-thumb:hover,
+      .output-area::-webkit-scrollbar-thumb:hover {
+        background: #3a3a3a;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 整体容器 -->
+    <div class="app-container">
+      <!-- 1. 顶部标题栏 -->
+      <div class="title-bar">
+        <div class="window-title">破晓工具箱</div>
+        <div class="window-controls">
+          <button class="control-btn btn-close" id="window-close-btn">
+            <img src="./assets/icons/close.svg" class="icon-svg icon-close" alt="关闭" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 主体内容 -->
+      <div class="main-body">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+          <a href="index.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item">
+              网易云音乐
+            </div>
+          </a>
+          <a href="cryptoPage.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item active">
+              文本加解密
+            </div>
+          </a>
+                    <a href="markdown.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item ">
+              Markdown 编辑器
+            </div>
+          </a>
+        </div>
+
+        <!-- 右侧内容填充区 -->
+        <div class="content-area">
+          <div class="crypto-section">
+            <!-- 加密方式与模式选择 -->
+            <div class="crypto-panel">
+              <div class="panel-title">
+                <span>加密方式</span>
+              </div>
+              <div class="algo-select-row">
+                <span class="algo-label">算法</span>
+                <select id="algo-select" class="algo-select">
+                  <option value="md5">MD5</option>
+                  <option value="sha1">SHA-1</option>
+                  <option value="sha256">SHA-256</option>
+                  <option value="sha512">SHA-512</option>
+                  <option value="base64">Base64</option>
+                  <option value="url">URL 编码</option>
+                  <option value="aes">AES</option>
+                  <option value="des">DES</option>
+                  <option value="rc4">RC4</option>
+                </select>
+                <div class="mode-toggle" id="mode-toggle">
+                  <button class="mode-btn active" data-mode="encrypt">加密</button>
+                  <button class="mode-btn" data-mode="decrypt">解密</button>
+                </div>
+              </div>
+              <!-- 密钥输入 (仅对称算法显示) -->
+              <div class="secret-row" id="secret-row">
+                <span class="algo-label">密钥</span>
+                <input type="text" id="secret-input" class="secret-input" placeholder="请输入密钥 / 密码..." />
+              </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="crypto-panel">
+              <div class="panel-title">
+                <span>待处理的内容</span>
+                <span class="result-count" id="input-count">0 字符</span>
+              </div>
+              <textarea
+                id="input-text"
+                class="crypto-textarea"
+                placeholder="在此输入需要加密或解密的内容..."
+              ></textarea>
+              <div class="crypto-actions">
+                <button class="crypto-btn primary" id="convert-btn">开始转换</button>
+                <button class="crypto-btn" id="swap-btn">↕ 交换</button>
+                <button class="crypto-btn" id="clear-btn">清空</button>
+              </div>
+            </div>
+
+            <!-- 输出区域 -->
+            <div class="crypto-panel output-panel">
+              <div class="panel-title">
+                <span>转换结果</span>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="result-count" id="output-count">0 字符</span>
+                  <button class="copy-btn" id="copy-btn">复制</button>
+                </div>
+              </div>
+              <textarea
+                id="output-text"
+                class="crypto-textarea output-area"
+                placeholder="转换结果将显示在这里..."
+                readonly
+              ></textarea>
+              <span class="crypto-status empty" id="crypto-status"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+    <script>
+      // ============ 加解密逻辑 ============
+
+      const algoSelect = document.getElementById('algo-select');
+      const modeToggle = document.getElementById('mode-toggle');
+      const secretRow = document.getElementById('secret-row');
+      const secretInput = document.getElementById('secret-input');
+      const inputText = document.getElementById('input-text');
+      const outputText = document.getElementById('output-text');
+      const convertBtn = document.getElementById('convert-btn');
+      const swapBtn = document.getElementById('swap-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const copyBtn = document.getElementById('copy-btn');
+      const statusEl = document.getElementById('crypto-status');
+      const inputCount = document.getElementById('input-count');
+      const outputCount = document.getElementById('output-count');
+
+      let currentMode = 'encrypt';
+
+      // 需要密钥的算法
+      const SECRET_ALGOS = ['aes', 'des', 'rc4'];
+      // 哈希类算法（不可逆，仅支持加密）
+      const HASH_ALGOS = ['md5', 'sha1', 'sha256', 'sha512'];
+
+      // 切换算法时控制密钥输入框显示
+      function updateSecretRow() {
+        const algo = algoSelect.value;
+        if (SECRET_ALGOS.includes(algo)) {
+          secretRow.classList.add('visible');
+        } else {
+          secretRow.classList.remove('visible');
+        }
+        // 哈希类算法只能加密
+        const decryptBtn = modeToggle.querySelector('[data-mode="decrypt"]');
+        if (HASH_ALGOS.includes(algo)) {
+          decryptBtn.disabled = true;
+          if (currentMode === 'decrypt') {
+            setMode('encrypt');
+          }
+        } else {
+          decryptBtn.disabled = false;
+        }
+      }
+
+      function setMode(mode) {
+        currentMode = mode;
+        modeToggle.querySelectorAll('.mode-btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+      }
+
+      // 模式切换按钮
+      modeToggle.querySelectorAll('.mode-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          setMode(btn.dataset.mode);
+        });
+      });
+
+      algoSelect.addEventListener('change', updateSecretRow);
+
+      // --- 加密算法实现 ---
+
+      function md5(input) {
+        return CryptoJS.MD5(input).toString();
+      }
+
+      function sha1(input) {
+        return CryptoJS.SHA1(input).toString();
+      }
+
+      function sha256(input) {
+        return CryptoJS.SHA256(input).toString();
+      }
+
+      function sha512(input) {
+        return CryptoJS.SHA512(input).toString();
+      }
+
+      function base64Encode(input) {
+        return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(input));
+      }
+
+      function base64Decode(input) {
+        try {
+          const words = CryptoJS.enc.Base64.parse(input.trim());
+          const result = words.toString(CryptoJS.enc.Utf8);
+          if (!result) throw new Error('empty');
+          return result;
+        } catch (e) {
+          throw new Error('Base64 解码失败，请检查输入是否为有效的 Base64 字符串');
+        }
+      }
+
+      function urlEncode(input) {
+        return encodeURIComponent(input);
+      }
+
+      function urlDecode(input) {
+        try {
+          return decodeURIComponent(input.replace(/\+/g, ' '));
+        } catch (e) {
+          throw new Error('URL 解码失败，请检查输入格式');
+        }
+      }
+
+      function aesEncrypt(input, key) {
+        return CryptoJS.AES.encrypt(input, key).toString();
+      }
+
+      function aesDecrypt(input, key) {
+        try {
+          const dec = CryptoJS.AES.decrypt(input.trim(), key);
+          const result = dec.toString(CryptoJS.enc.Utf8);
+          if (!result) throw new Error('empty');
+          return result;
+        } catch (e) {
+          throw new Error('AES 解密失败，请检查密钥和密文是否正确');
+        }
+      }
+
+      function desEncrypt(input, key) {
+        return CryptoJS.DES.encrypt(input, key).toString();
+      }
+
+      function desDecrypt(input, key) {
+        try {
+          const dec = CryptoJS.DES.decrypt(input.trim(), key);
+          const result = dec.toString(CryptoJS.enc.Utf8);
+          if (!result) throw new Error('empty');
+          return result;
+        } catch (e) {
+          throw new Error('DES 解密失败，请检查密钥和密文是否正确');
+        }
+      }
+
+      function rc4Encrypt(input, key) {
+        return CryptoJS.RC4.encrypt(input, key).toString();
+      }
+
+      function rc4Decrypt(input, key) {
+        try {
+          const dec = CryptoJS.RC4.decrypt(input.trim(), key);
+          const result = dec.toString(CryptoJS.enc.Utf8);
+          if (!result) throw new Error('empty');
+          return result;
+        } catch (e) {
+          throw new Error('RC4 解密失败，请检查密钥和密文是否正确');
+        }
+      }
+
+      // 调度函数
+      function process() {
+        const algo = algoSelect.value;
+        const input = inputText.value;
+        const key = secretInput.value;
+
+        if (!input) {
+          statusEl.textContent = '请输入待处理的内容';
+          statusEl.classList.add('error');
+          statusEl.classList.remove('empty');
+          return;
+        }
+
+        // 对称算法需要密钥
+        if (SECRET_ALGOS.includes(algo) && !key) {
+          statusEl.textContent = '请输入密钥';
+          statusEl.classList.add('error');
+          statusEl.classList.remove('empty');
+          return;
+        }
+
+        try {
+          let result = '';
+          if (currentMode === 'encrypt') {
+            switch (algo) {
+              case 'md5': result = md5(input); break;
+              case 'sha1': result = sha1(input); break;
+              case 'sha256': result = sha256(input); break;
+              case 'sha512': result = sha512(input); break;
+              case 'base64': result = base64Encode(input); break;
+              case 'url': result = urlEncode(input); break;
+              case 'aes': result = aesEncrypt(input, key); break;
+              case 'des': result = desEncrypt(input, key); break;
+              case 'rc4': result = rc4Encrypt(input, key); break;
+            }
+          } else {
+            switch (algo) {
+              case 'base64': result = base64Decode(input); break;
+              case 'url': result = urlDecode(input); break;
+              case 'aes': result = aesDecrypt(input, key); break;
+              case 'des': result = desDecrypt(input, key); break;
+              case 'rc4': result = rc4Decrypt(input, key); break;
+            }
+          }
+
+          outputText.value = result;
+          outputCount.textContent = result.length + ' 字符';
+          statusEl.textContent = '转换成功';
+          statusEl.classList.remove('error');
+          statusEl.classList.remove('empty');
+        } catch (e) {
+          outputText.value = '';
+          outputCount.textContent = '0 字符';
+          statusEl.textContent = e.message;
+          statusEl.classList.add('error');
+          statusEl.classList.remove('empty');
+        }
+      }
+
+      // 事件绑定
+      convertBtn.addEventListener('click', process);
+
+      // Ctrl+Enter 快捷转换
+      inputText.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          process();
+        }
+      });
+
+      // 交换输入输出
+      swapBtn.addEventListener('click', () => {
+        const tmp = inputText.value;
+        inputText.value = outputText.value;
+        outputText.value = tmp;
+        inputCount.textContent = inputText.value.length + ' 字符';
+        outputCount.textContent = outputText.value.length + ' 字符';
+      });
+
+      // 清空
+      clearBtn.addEventListener('click', () => {
+        inputText.value = '';
+        outputText.value = '';
+        inputCount.textContent = '0 字符';
+        outputCount.textContent = '0 字符';
+        statusEl.textContent = '';
+        statusEl.classList.add('empty');
+      });
+
+      // 复制
+      copyBtn.addEventListener('click', async () => {
+        if (!outputText.value) return;
+        try {
+          await navigator.clipboard.writeText(outputText.value);
+          const old = copyBtn.textContent;
+          copyBtn.textContent = '已复制 ✓';
+          setTimeout(() => (copyBtn.textContent = old), 1500);
+        } catch (e) {
+          statusEl.textContent = '复制失败';
+          statusEl.classList.add('error');
+        }
+      });
+
+      // 字符计数
+      inputText.addEventListener('input', () => {
+        inputCount.textContent = inputText.value.length + ' 字符';
+      });
+
+      // 窗口关闭按钮
+      document.getElementById('window-close-btn').addEventListener('click', () => {
+        if (window.close) window.close();
+      });
+
+      // 初始化
+      updateSecretRow();
+    </script>
+  </body>
+</html>
