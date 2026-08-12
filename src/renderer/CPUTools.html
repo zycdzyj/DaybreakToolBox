@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>硬件信息 - 图吧工具箱</title>
+    <link rel="stylesheet" href="assets/CPUTools.css" />
+  </head>
+  <body>
+    <!-- 整体容器 -->
+    <div class="app-container">
+      <!-- 1. 顶部标题栏 -->
+      <div class="title-bar">
+        <div class="window-title">硬件信息</div>
+        <div class="window-controls">
+          <button class="control-btn btn-close" id="window-close-btn">
+            <svg class="icon-svg icon-close" viewBox="0 0 8 8" fill="none">
+              <path d="M1 1L7 7M1 7L7 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 主体内容 -->
+      <div class="main-body">
+        <!-- 左侧导航栏 -->
+        <div class="sidebar">
+            <div class="nav-item">网易云音乐</div>
+          </a>
+          <a href="cryptoPage.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item">文本加解密</div>
+          </a>
+          <a href="CPUTools.html" style="text-decoration: none; color: inherit;">
+            <div class="nav-item active">CPU工具</div>
+          </a>
+        </div>
+
+        <!-- 右侧内容填充区 -->
+        <div class="content-area">
+          <!-- 提示栏 -->
+          <div class="tip-bar">提示：单击选择工具可查看工具说明，双击可启动工具。</div>
+
+          <!-- 工具网格区域 -->
+          <div class="tools-section">
+            <div class="section-header">
+              <span class="section-title" id="category-title">硬件信息</span>
+              <span class="tool-count" id="tool-count">共 0 个工具</span>
+            </div>
+            <div class="tools-grid" id="tools-grid">
+              <!-- 工具图标由 JS 动态渲染 -->
+            </div>
+          </div>
+
+          <!-- 底部状态栏 -->
+          <div class="status-bar">
+            <span>Version: 2022.01</span>
+            <span id="status-text">就绪</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./src/CPUTools.ts"></script>
+  </body>
+</html>

@@ -25,7 +25,9 @@ const api = {
   downloadMusic: (musicId: number, songName: string, artistName: string) => {
     return ipcRenderer.invoke('download-music', { musicId, songName, artistName })
   },
-
+  openFile: (toolName: string) => {
+    return ipcRenderer.invoke('open-file', { toolName })
+  },
   // 获取分享链接
   getShareUrl: (musicId: number) => {
     return ipcRenderer.invoke('get-share-url', { musicId })

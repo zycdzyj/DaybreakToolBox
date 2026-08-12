@@ -16,6 +16,7 @@ interface SongInfo {
   picUrl: string
 }
 
+
 // ================== Cookie 与加密辅助 ==================
 let userCookie: string = ''
 
@@ -28,6 +29,20 @@ function getMusicCookies(): Record<string, string> {
     deviceId: 'pyncm!'
   }
 }
+
+ipcMain.handle('open-file', async (_event, { toolName }) => {
+  try {
+    switch (toolName) {
+      case 'CPU-Z':
+        await shell.openPath(join(__dirname, '../src/Tools/CPUZ/cpuz64.exe'))
+        break
+      default:
+        break
+    }
+  } catch (error) {
+    console.error('Failed to open file:', error)
+  }
+})
 
 function buildCookieHeader(cookies: Record<string, string>): string {
   return Object.entries(cookies)
