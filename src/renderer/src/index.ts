@@ -175,9 +175,15 @@ function init(): void {
     }
 
     const isOpen = toolboxGroup.classList.contains('open')
+    const isInSubmenuPage = currentPage === 'CPUTools.html'
+
+    if (isInSubmenuPage && isOpen) {
+      return
+    }
+
     toolboxGroup.classList.toggle('open', !isOpen)
 
-    if (!isOpen && currentPage === 'CPUTools.html') {
+    if (!isOpen && isInSubmenuPage) {
       setToolboxMenuOpen(true)
     }
   })
