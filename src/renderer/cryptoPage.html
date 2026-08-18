@@ -293,46 +293,35 @@
       .output-area::-webkit-scrollbar-thumb:hover {
         background: #3a3a3a;
       }
+
+      /* ============ iframe 内嵌页面样式 ============ */
+      /* 外层 index.html 已提供标题栏和导航栏，本页只渲染内容区 */
+      body {
+        background: #0a0a0a;
+        display: block !important;
+        height: 100vh;
+        width: 100vw;
+        justify-content: normal !important;
+        align-items: normal !important;
+        overflow: hidden;
+      }
+
+      /* 内容区填满 iframe */
+      .frame-page {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        background: #0a0a0a;
+        overflow: hidden;
+      }
     </style>
   </head>
   <body>
-    <!-- 整体容器 -->
-    <div class="app-container">
-      <!-- 1. 顶部标题栏 -->
-      <div class="title-bar">
-        <div class="window-title">破晓工具箱</div>
-        <div class="window-controls">
-          <button class="control-btn btn-close" id="window-close-btn">
-            <img src="./assets/icons/close.svg" class="icon-svg icon-close" alt="关闭" />
-          </button>
-        </div>
-      </div>
-
-      <!-- 2. 主体内容 -->
-      <div class="main-body">
-        <!-- 左侧导航栏 -->
-        <div class="sidebar">
-          <a href="index.html" style="text-decoration: none; color: inherit;">
-            <div class="nav-item">
-              网易云音乐
-            </div>
-          </a>
-          <a href="cryptoPage.html" style="text-decoration: none; color: inherit;">
-            <div class="nav-item active">
-              文本加解密
-            </div>
-          </a>
-          <a href="CPUTools.html" style="text-decoration: none; color: inherit;">
-            <div class="nav-item">
-              CPU工具
-            </div>
-          </a>
-
-        </div>
-
-        <!-- 右侧内容填充区 -->
-        <div class="content-area">
-          <div class="crypto-section">
+    <!-- 内容区（无标题栏/导航栏，由外层 index.html 的 iframe 承载） -->
+    <div class="frame-page">
+      <div class="crypto-section">
             <!-- 加密方式与模式选择 -->
             <div class="crypto-panel">
               <div class="panel-title">
@@ -400,8 +389,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
     <script>
@@ -661,11 +648,6 @@
       // 字符计数
       inputText.addEventListener('input', () => {
         inputCount.textContent = inputText.value.length + ' 字符';
-      });
-
-      // 窗口关闭按钮
-      document.getElementById('window-close-btn').addEventListener('click', () => {
-        if (window.close) window.close();
       });
 
       // 初始化

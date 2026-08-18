@@ -1,10 +1,48 @@
-
 <!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>网易云音乐 - Electron</title>
+    <title>破晓工具箱</title>
     <link rel="stylesheet" href="assets/main.css" />
+    <style>
+      /* ============ 主框架（导航栏 + iframe 内容区）专用样式 ============ */
+
+      /* 内容区改为 iframe 承载 */
+      .content-area {
+        padding: 0;
+        gap: 0;
+        overflow: hidden;
+      }
+
+      /* iframe 容器：填满内容区 */
+      .frame-container {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        background: transparent;
+      }
+
+      .frame-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+      }
+
+      /* 淡入淡出动画 */
+      .frame-container iframe.fade-out {
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+
+      .frame-container iframe.fade-in {
+        opacity: 1;
+        transition: opacity 0.25s ease;
+      }
+    </style>
   </head>
   <body>
     <!-- 整体容器 -->
@@ -23,123 +61,35 @@
       <div class="main-body">
         <!-- 左侧导航栏 -->
         <div class="sidebar">
-          <a href="index.html" style="text-decoration: none; color: inherit;">
-          <div class="nav-item active">
-            
+          <div class="nav-indicator"></div>
+
+          <div class="nav-item" data-page="NetEase.html">
             网易云音乐
           </div>
-          </a>
-          <a href="cryptoPage.html" style="text-decoration: none; color: inherit;">
-                    <div class="nav-item " >
-            
+          <div class="nav-item" data-page="cryptoPage.html">
             文本加解密
           </div>
-          </a>
-          <a href="CPUTools.html" style="text-decoration: none; color: inherit;">
-                    <div class="nav-item " >
-            
-            CPU工具
+
+          <div class="nav-group" data-group="toolbox">
+            <div class="nav-item nav-group-trigger" data-group-trigger="toolbox">
+              图吧工具箱
+            </div>
+            <div class="nav-submenu">
+              <div class="nav-item nav-subitem" data-page="CPUTools.html">
+                CPU工具
+              </div>
+            </div>
           </div>
-          </a>
         </div>
 
-        <!-- 右侧内容填充区 -->
+        <!-- 右侧内容区：iframe 承载各功能页面 -->
         <div class="content-area">
-          <!-- 搜索区域 -->
-          <div class="search-section">
-            <div class="search-row">
-              <input
-                type="text"
-                id="search-music"
-                class="solid-input search-input"
-                placeholder="搜索网易云音乐..."
-              />
-              <button class="solid-btn search-btn" id="search_music_btn">
-                <img src="./assets/icons/search.svg" class="icon-svg icon-btn" alt="" />
-                搜索
-              </button>
-            </div>
-          </div>
-
-          <!-- 歌曲列表 -->
-          <div class="song-list-section">
-            <div class="section-header">
-              <span class="section-title">歌曲列表</span>
-              <span class="song-count" id="songCount">共 0 首</span>
-            </div>
-            <div class="song-list" id="songListContainer">
-              <div class="song-item placeholder-item">
-                <span class="song-index">#</span>
-                <span class="song-name">暂无歌曲</span>
-                <span class="song-artist">-</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cookie 设置区域 -->
-          <div class="cookie-section">
-            <div class="cookie-header">
-              <span class="cookie-title">Cookie 设置 (Music_U)</span>
-            </div>
-            <div class="cookie-content">
-              <input
-                type="text"
-                id="cookie-input"
-                class="cookie-input-field"
-                placeholder="在此粘贴 MUSIC_U Cookie 值..."
-              />
-              <div class="cookie-actions">
-                <button class="solid-btn cookie-btn save-btn" id="cookie-save-btn">保存</button>
-                <button class="solid-btn cookie-btn share-btn" id="share-music-btn">
-                  <img src="./assets/icons/share.svg" class="icon-svg icon-btn" alt="" />
-                  分享
-                </button>
-                <span class="cookie-status" id="cookie-status"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 歌曲播放状态栏 -->
-          <div class="player-bar">
-            <div class="player-info">
-              <div class="player-cover">
-                <img id="player-cover-img" class="player-cover-img" src="" alt="歌曲封面" />
-
-              </div>
-              <div class="player-song-detail">
-                <div class="player-song-name">未在播放</div>
-                <div class="player-artist-name">-</div>
-              </div>
-            </div>
-            <div class="player-controls">
-              <button class="player-btn prev-btn" title="上一首">
-                <img src="./assets/icons/prev.svg" class="icon-svg icon-ctrl" alt="上一首" />
-              </button>
-              <button class="player-btn play-btn" title="播放/暂停">
-                <img src="./assets/icons/play.svg" class="icon-svg icon-play" id="play-icon" alt="播放" />
-              </button>
-              <button class="player-btn next-btn" title="下一首">
-                <img src="./assets/icons/next.svg" class="icon-svg icon-ctrl" alt="下一首" />
-              </button>
-            </div>
-            <div class="player-progress">
-              <span class="progress-time current-time">00:00</span>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%"></div>
-              </div>
-              <span class="progress-time total-time">00:00</span>
-            </div>
-            <div class="player-volume">
-              <button class="player-btn volume-btn" id="volume-btn" title="静音/取消静音">
-                <img src="./assets/icons/volume.svg" class="icon-svg icon-vol" id="volume-icon" alt="音量" />
-              </button>
-              <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80" title="音量调节" />
-            </div>
+          <div class="frame-container" id="frame-container">
+            <!-- iframe 由 index.ts 动态创建，默认加载 NetEase.html -->
           </div>
         </div>
       </div>
     </div>
-    <audio id="music-player" preload="metadata"></audio>
-    <script type="module" src="./src/renderer.ts"></script>
+    <script type="module" src="./src/index.ts"></script>
   </body>
 </html>

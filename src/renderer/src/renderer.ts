@@ -4,11 +4,12 @@ interface Window {
     searchMusic: (keyword: string) => Promise<Song[]>
     getMusicByIds: (musicIds: string) => Promise<unknown>
     getMusicLyric: (musicId: string) => Promise<unknown>
-    getMusicUrl: (musicId: string, level?: string) => Promise<unknown>
+    getMusicUrl: (musicId: number | string, level?: string) => Promise<unknown>
     downloadMusic: (musicId: number, songName: string, artistName: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
     getShareUrl: (musicId: number) => Promise<{ url: string }>
     setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
     getCookie: () => Promise<{ cookie: string; masked: string }>
+    openFile: (toolName: string) => Promise<unknown>
     closeWindow: () => void
   }
 }

@@ -2,7 +2,7 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { createCipheriv, createHash } from 'crypto'
-import { createWriteStream, existsSync, mkdirSync } from 'fs'
+import { createWriteStream } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
@@ -34,7 +34,7 @@ ipcMain.handle('open-file', async (_event, { toolName }) => {
   try {
     switch (toolName) {
       case 'CPU-Z':
-        await shell.openPath(join(__dirname, '../src/Tools/CPUZ/cpuz64.exe'))
+        await shell.openPath(join(__dirname, '../Tools/CPUZ/cpuz64.exe'))
         break
       default:
         break
@@ -394,20 +394,32 @@ function registerIpcHandlers() {
 // ================== 创建窗口 ==================
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 600,
+    width: 1000,
+    height: 800,
+    center: true,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     frame: false,
     transparent: true,
+    backgroundColor: '#00000000',
     hasShadow: false,
     resizable: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      // 允许 preload 在 iframe 子 frame 中运行，使各功能页面均可访问 window.api
+      nodeIntegrationInSubFrames: true
     }
   })
+
+  mainWindow.setBackgroundColor('#00000000')
+
+  if (process.platform === 'win32') {
+    mainWindow.setBackgroundMaterial('acrylic')
+  } else if (process.platform === 'darwin') {
+    mainWindow.setVibrancy('sidebar')
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -424,7 +436,6 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-
 // ================== 注册 IPC 处理器 ==================
 // 在 app.whenReady 之前注册
 registerIpcHandlers()
