@@ -156,7 +156,25 @@ body {
     border-radius: 12px;
     padding: 8px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
     transition: all 0.4s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
 }
 
 .nav-indicator {
@@ -247,7 +265,7 @@ body {
 }
 
 .nav-group.open .nav-submenu {
-    max-height: 96px;
+    max-height: 520px;
     opacity: 1;
     margin-top: 8px;
 }

@@ -1,7 +1,0 @@
-OldCpuSpeed=4053
-NewCpuSpeedCount=1
-NewCpuSpeed=3661
-ComputerGUID=c279076885bd70170ae287cc15c838fb
-RollingAverage=1000
-RollingStartTime=0
-RollingAverageIsFromV27=1

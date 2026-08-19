@@ -25,8 +25,8 @@ const api = {
   downloadMusic: (musicId: number, songName: string, artistName: string, cookie?: string) => {
     return ipcRenderer.invoke('download-music', { musicId, songName, artistName, cookie })
   },
-  openFile: (toolName: string) => {
-    return ipcRenderer.invoke('open-file', { toolName })
+  openFile: (toolPath: string) => {
+    return ipcRenderer.invoke('open-file', { toolPath })
   },
   // 获取分享链接
   getShareUrl: (musicId: number) => {
@@ -69,6 +69,7 @@ declare global {
       getMusicLyric: (musicId: string, cookie?: string) => Promise<unknown>
       getMusicUrl: (musicId: string, level?: string, cookie?: string) => Promise<unknown>
       downloadMusic: (musicId: number, songName: string, artistName: string, cookie?: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
+      openFile: (toolPath: string) => Promise<void>
       getShareUrl: (musicId: number) => Promise<{ url: string }>
       setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
       getCookie: () => Promise<{ cookie: string; masked: string }>

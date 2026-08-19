@@ -2,6 +2,18 @@
 // 主框架导航栏切换逻辑：通过 iframe 加载各功能页面，切换时淡入淡出
 
 const FADE_MS = 250 // 与 CSS 中的 transition 时长保持一致
+const toolboxPages = new Set([
+  'otherTools.html',
+  'memoryTools.html',
+  'processorTools.html',
+  'peripheralTools.html',
+  'commonTools.html',
+  'graphicsTools.html',
+  'monitorTools.html',
+  'stressTools.html',
+  'diskTools.html',
+  'comprehensiveTools.html'
+])
 
 const frameContainer = document.getElementById('frame-container') as HTMLElement | null
 const sidebar = document.querySelector<HTMLElement>('.sidebar')
@@ -135,7 +147,7 @@ async function switchPage(page: string): Promise<void> {
 
   const selectedItem = navItems.find((item) => item.dataset.page === page) ?? null
   updateNavIndicator(selectedItem)
-  setToolboxMenuOpen(page === 'CPUTools.html')
+  setToolboxMenuOpen(toolboxPages.has(page))
 
   try {
     // 1. 淡出并移除旧的 iframe
@@ -175,7 +187,7 @@ function init(): void {
     }
 
     const isOpen = toolboxGroup.classList.contains('open')
-    const isInSubmenuPage = currentPage === 'CPUTools.html'
+    const isInSubmenuPage = currentPage !== null && toolboxPages.has(currentPage)
 
     if (isInSubmenuPage && isOpen) {
       return

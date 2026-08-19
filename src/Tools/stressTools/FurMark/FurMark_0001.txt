@@ -1,0 +1,31 @@
+<->[NORMAL]#00000001#Mon Nov 17 06:59:06 2025#FurMark 1.25.1.0 is starting up...
+<->[NORMAL]#00000002#Mon Nov 17 06:59:06 2025#FurMark folder: C:\图吧工具箱\tools\烤鸡工具\FurMark\
+<->[NORMAL]#00000003#Mon Nov 17 06:59:06 2025#Log file: C:\图吧工具箱\tools\烤鸡工具\FurMark\FurMark_0001.txt
+<->[NORMAL]#00000004#Mon Nov 17 06:59:06 2025#CPU/System info:
+<->[NORMAL]#00000005#Mon Nov 17 06:59:06 2025#- CPU: 12th Gen Intel(R) Core(TM) i5-12450H
+<->[NORMAL]#00000006#Mon Nov 17 06:59:07 2025#- CPU speed: 2495 MHz
+<->[NORMAL]#00000007#Mon Nov 17 06:59:07 2025#- System memory: 7905 MB
+<->[NORMAL]#00000008#Mon Nov 17 06:59:07 2025#- OS: Windows 10 64-bit build 19045
+<->[NORMAL]#00000009#Mon Nov 17 06:59:07 2025#Detecting GPUs...
+<->[NORMAL]#00000010#Mon Nov 17 06:59:07 2025#Found 1 GPUs.
+<->[NORMAL]#00000011#Mon Nov 17 06:59:07 2025#- GPU 1:  Intel(R) UHD Graphics
+<->[NORMAL]#00000012#Mon Nov 17 06:59:07 2025#  - Cores: 0
+<->[NORMAL]#00000013#Mon Nov 17 06:59:07 2025#  - Memory size: 2047MB
+<->[NORMAL]#00000014#Mon Nov 17 06:59:07 2025#  - Memory type: 
+<->[NORMAL]#00000015#Mon Nov 17 06:59:07 2025#  - TDP: 0W
+<->[NORMAL]#00000016#Mon Nov 17 06:59:07 2025#  - Bus ID: -1
+<->[NORMAL]#00000017#Mon Nov 17 06:59:07 2025#  - Bios: Intel Video BIOS
+<->[NORMAL]#00000018#Mon Nov 17 06:59:07 2025#  - Graphics driver: 32.0.101.7040
+<->[NORMAL]#00000019#Mon Nov 17 06:59:07 2025#no multi-GPU support (1 physical GPUs)
+<->[NORMAL]#00000020#Mon Nov 17 06:59:07 2025#GPU monitoring thread started up ok.
+<->[NORMAL]#00000021#Mon Nov 17 06:59:07 2025#oZone3D Engine is starting up - kernel build: [v3.4.2 - Oct 29 2020 @ 13:44:26] - codename: Zhadanas
+<->[NORMAL]#00000022#Mon Nov 17 06:59:07 2025#oZone3D initialization in progress...
+<->[NORMAL]#00000023#Mon Nov 17 06:59:07 2025#oZone3D - OpenGL renderer creation ok.
+<->[NORMAL]#00000024#Mon Nov 17 06:59:07 2025#o3RendererOpenGL INFO: OpenGL version: 4.6.0 - Build 32.0.101.7040
+<->[NORMAL]#00000025#Mon Nov 17 06:59:07 2025#o3RendererOpenGL INFO: OpenGL Shading Language (GLSL) version: 4.60 - Build 32.0.101.7040
+<->[NORMAL]#00000026#Mon Nov 17 06:59:07 2025#oZone3D initialization ok.
+<->[NORMAL]#00000027#Mon Nov 17 06:59:07 2025#Checking for new version...
+<->[NORMAL]#00000028#Mon Nov 17 06:59:09 2025#A new version is available: 1.39.3.0
+<->[NORMAL]#00000029#Mon Nov 17 06:59:27 2025#Render thread - affinity mask set to 0
+<->[NORMAL]#00000030#Mon Nov 17 07:00:55 2025#oZone3D shutdown ok.
+<->[NORMAL]#00000031#Mon Nov 17 07:00:55 2025#FurMark shutdown OK.

@@ -40,36 +40,21 @@ function getToolPath(toolPath: string): string {
   return app.isPackaged ? join(process.resourcesPath, '..', toolPath) : join(__dirname, '..', toolPath)
 }
 
-ipcMain.handle('open-file', async (_event, { toolName }) => {
+ipcMain.handle('open-file', async (_event, { toolPath, toolName }) => {
   try {
-    switch (toolName) {
-      case 'CPU-Z':
-        await shell.openPath(getToolPath('Tools/CPUZ/cpuz64.exe'))
-        break
-      case 'LinX':
-        await shell.openPath(getToolPath('Tools/LinX/LinX.exe'))
-        break
-      case 'Prime95':
-        await shell.openPath(getToolPath('Tools/Prime95/prime95x64.exe'))
-        break
-      case 'SuperPI':
-        await shell.openPath(getToolPath('Tools/superpi/Superpi.exe'))
-        break
-      case 'ThrottleStop':
-        await shell.openPath(getToolPath('Tools/ThrottleStop/ThrottleStop.exe'))
-        break
-      case 'wPrime':
-        await shell.openPath(getToolPath('Tools/wPrime/wPrime.exe'))
-        break
-      case 'XIANGQI':
-        await shell.openPath(getToolPath('Tools/XIANGQI/xiangqi.exe'))
-        break
-      case '线程炸弹':
-        await shell.openPath(getToolPath('Tools/线程炸弹/线程炸弹.zip'))
-        break
-      default:
-        break
+    const legacyToolPaths: Record<string, string> = {
+      'CPU-Z': 'processorTools/CPUZ/cpuz64.exe',
+      LinX: 'processorTools/LinX/LinX.exe',
+      Prime95: 'processorTools/Prime95/prime95x64.exe',
+      SuperPI: 'processorTools/superpi/Superpi.exe',
+      ThrottleStop: 'processorTools/ThrottleStop/ThrottleStop.exe',
+      wPrime: 'processorTools/wPrime/wPrime.exe',
+      XIANGQI: 'processorTools/XIANGQI/xiangqi.exe',
+      线程炸弹: 'processorTools/线程炸弹/线程炸弹.zip'
     }
+    const selectedPath = toolPath || legacyToolPaths[toolName]
+    if (!selectedPath || selectedPath.includes('..') || selectedPath.includes(':')) return
+    await shell.openPath(getToolPath(join('Tools', selectedPath)))
   } catch (error) {
     console.error('Failed to open file:', error)
   }
