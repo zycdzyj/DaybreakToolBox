@@ -1,11 +1,11 @@
 // renderer.ts
 interface Window {
   api: {
-    searchMusic: (keyword: string) => Promise<Song[]>
-    getMusicByIds: (musicIds: string) => Promise<unknown>
-    getMusicLyric: (musicId: string) => Promise<unknown>
-    getMusicUrl: (musicId: number | string, level?: string) => Promise<unknown>
-    downloadMusic: (musicId: number, songName: string, artistName: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
+    searchMusic: (keyword: string, cookie?: string) => Promise<Song[]>
+    getMusicByIds: (musicIds: string, cookie?: string) => Promise<unknown>
+    getMusicLyric: (musicId: string, cookie?: string) => Promise<unknown>
+    getMusicUrl: (musicId: number | string, level?: string, cookie?: string) => Promise<unknown>
+    downloadMusic: (musicId: number, songName: string, artistName: string, cookie?: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
     getShareUrl: (musicId: number) => Promise<{ url: string }>
     setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
     getCookie: () => Promise<{ cookie: string; masked: string }>
@@ -29,6 +29,7 @@ const container = document.getElementById('songListContainer')
 let currentResults: Song[] = []
 let currentIndex = -1
 let isPlaying = false
+let currentCookie = ''
 
 const audioElement = document.getElementById('music-player') as HTMLAudioElement | null
 const playerCoverImg = document.getElementById('player-cover-img') as HTMLImageElement | null
@@ -57,7 +58,9 @@ function isApiAvailable(): boolean {
     window.api &&
     typeof window.api.searchMusic === 'function' &&
     typeof window.api.getMusicByIds === 'function' &&
-    typeof window.api.getMusicUrl === 'function'
+    typeof window.api.getMusicUrl === 'function' &&
+    typeof window.api.setCookie === 'function' &&
+    typeof window.api.getCookie === 'function'
   )
 }
 
@@ -80,7 +83,7 @@ async function handleSearch(): Promise<void> {
   }
 
   try {
-    const results = await window.api.searchMusic(searchText)
+    const results = await window.api.searchMusic(searchText, currentCookie)
     currentResults = results
     console.log('收到搜索结果:', results)
 
@@ -253,7 +256,7 @@ async function loadAndPlaySong(index: number): Promise<void> {
   }
 
   try {
-    const response = await window.api.getMusicUrl(song.id)
+    const response = await window.api.getMusicUrl(song.id, 'sky', currentCookie)
     const audioUrl = extractAudioUrl(response)
 
     if (!audioUrl) {
@@ -377,7 +380,7 @@ closeBtn?.addEventListener('click', () => {
 })
 
 // ================== 下载功能 ==================
-const downloadBtn = document.querySelector('.save-btn') as HTMLButtonElement | null
+const downloadBtn = document.getElementById('download-music-btn') as HTMLButtonElement | null
 downloadBtn?.addEventListener('click', async () => {
   if (currentIndex < 0 || currentIndex >= currentResults.length) {
     alert('请先选择一首歌曲')
@@ -397,7 +400,8 @@ downloadBtn?.addEventListener('click', async () => {
     const result = await window.api.downloadMusic(
       song.id,
       song.name,
-      Array.isArray(song.artists) ? song.artists.join('/') : song.artists
+      Array.isArray(song.artists) ? song.artists.join('/') : song.artists,
+      currentCookie
     )
 
     if (result.success) {
@@ -432,7 +436,7 @@ shareBtn?.addEventListener('click', async () => {
   shareBtn.disabled = true
 
   try {
-    const response = await window.api.getMusicUrl(song.id)
+    const response = await window.api.getMusicUrl(song.id, 'sky', currentCookie)
     const audioUrl = extractAudioUrl(response)
 
     if (audioUrl) {
@@ -460,6 +464,7 @@ async function initCookieDisplay(): Promise<void> {
   if (!isApiAvailable()) return
   try {
     const result = await window.api.getCookie()
+    currentCookie = result.cookie || ''
     if (result.masked) {
       updateCookieStatus(result.masked, true)
     }
@@ -492,6 +497,7 @@ cookieSaveBtn?.addEventListener('click', async () => {
   try {
     const result = await window.api.setCookie(value)
     if (result.success) {
+      currentCookie = value
       updateCookieStatus(result.masked, true)
       if (cookieInput) cookieInput.value = ''
     }

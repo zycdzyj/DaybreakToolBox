@@ -20,9 +20,15 @@ interface SongInfo {
 // ================== Cookie 与加密辅助 ==================
 let userCookie: string = ''
 
-function getMusicCookies(): Record<string, string> {
+function normalizeMusicCookie(cookie: string): string {
+  const trimmedCookie = cookie.trim()
+  const musicCookie = trimmedCookie.match(/(?:^|;\s*)MUSIC_U=([^;]+)/i)
+  return (musicCookie?.[1] ?? trimmedCookie).trim()
+}
+
+function getMusicCookies(cookie?: string): Record<string, string> {
   return {
-    MUSIC_U: userCookie,
+    MUSIC_U: normalizeMusicCookie(cookie || userCookie),
     os: 'pc',
     appver: '8.9.75',
     osver: '',
@@ -30,11 +36,36 @@ function getMusicCookies(): Record<string, string> {
   }
 }
 
+function getToolPath(toolPath: string): string {
+  return app.isPackaged ? join(process.resourcesPath, '..', toolPath) : join(__dirname, '..', toolPath)
+}
+
 ipcMain.handle('open-file', async (_event, { toolName }) => {
   try {
     switch (toolName) {
       case 'CPU-Z':
-        await shell.openPath(join(__dirname, '../Tools/CPUZ/cpuz64.exe'))
+        await shell.openPath(getToolPath('Tools/CPUZ/cpuz64.exe'))
+        break
+      case 'LinX':
+        await shell.openPath(getToolPath('Tools/LinX/LinX.exe'))
+        break
+      case 'Prime95':
+        await shell.openPath(getToolPath('Tools/Prime95/prime95x64.exe'))
+        break
+      case 'SuperPI':
+        await shell.openPath(getToolPath('Tools/superpi/Superpi.exe'))
+        break
+      case 'ThrottleStop':
+        await shell.openPath(getToolPath('Tools/ThrottleStop/ThrottleStop.exe'))
+        break
+      case 'wPrime':
+        await shell.openPath(getToolPath('Tools/wPrime/wPrime.exe'))
+        break
+      case 'XIANGQI':
+        await shell.openPath(getToolPath('Tools/XIANGQI/xiangqi.exe'))
+        break
+      case '线程炸弹':
+        await shell.openPath(getToolPath('Tools/线程炸弹/线程炸弹.zip'))
         break
       default:
         break
@@ -90,9 +121,9 @@ async function postWithCookies(url: string, data: URLSearchParams | Record<strin
 }
 
 // ================== 搜索功能 ==================
-async function searchMusic(keywords: string, limit: number = 10): Promise<SongInfo[]> {
+async function searchMusic(keywords: string, limit: number = 10, cookie?: string): Promise<SongInfo[]> {
   const url = 'https://music.163.com/api/cloudsearch/pc'
-  const cookies = getMusicCookies()
+  const cookies = getMusicCookies(cookie)
 
   const params = new URLSearchParams({
     s: keywords,
@@ -125,15 +156,15 @@ async function searchMusic(keywords: string, limit: number = 10): Promise<SongIn
   }
 }
 
-async function getSongDetail(musicId: number | string): Promise<unknown> {
-  const cookies = getMusicCookies()
+async function getSongDetail(musicId: number | string, cookie?: string): Promise<unknown> {
+  const cookies = getMusicCookies(cookie)
   const payload = { c: JSON.stringify([{ id: String(musicId), v: 0 }]) }
   const response = await postWithCookies('https://interface3.music.163.com/api/v3/song/detail', payload, cookies)
   return response.data
 }
 
-async function getSongLyric(musicId: number | string): Promise<unknown> {
-  const cookies = getMusicCookies()
+async function getSongLyric(musicId: number | string, cookie?: string): Promise<unknown> {
+  const cookies = getMusicCookies(cookie)
   const payload = {
     id: String(musicId),
     cp: 'false',
@@ -162,8 +193,8 @@ function extractSongUrl(responseData: unknown): string | null {
   return null
 }
 
-async function getSongUrl(musicId: number | string, level: string = 'sky'): Promise<unknown> {
-  const cookies = getMusicCookies()
+async function getSongUrl(musicId: number | string, level: string = 'sky', cookie?: string): Promise<unknown> {
+  const cookies = getMusicCookies(cookie)
   const url = 'https://interface3.music.163.com/eapi/song/enhance/player/url/v1'
   const config = {
     os: 'pc',
@@ -201,16 +232,17 @@ async function getSongUrl(musicId: number | string, level: string = 'sky'): Prom
 async function downloadMusic(
   musicId: number,
   songName: string,
-  artistName: string
+  artistName: string,
+  cookie?: string
 ): Promise<{ success: boolean; filePath?: string; error?: string }> {
   try {
     // 1. 获取播放地址
-    const urlResponse = await getSongUrl(musicId, 'sky')
+    const urlResponse = await getSongUrl(musicId, 'sky', cookie)
     const audioUrl = extractSongUrl(urlResponse)
 
     if (!audioUrl) {
       // 尝试标准音质
-      const urlResponse2 = await getSongUrl(musicId, 'standard')
+      const urlResponse2 = await getSongUrl(musicId, 'standard', cookie)
       const audioUrl2 = extractSongUrl(urlResponse2)
       if (!audioUrl2) {
         return { success: false, error: '无法获取歌曲播放地址，可能需要 VIP' }
@@ -277,7 +309,7 @@ function getShareUrl(musicId: number): string {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function registerIpcHandlers() {
   // 搜索音乐
-  ipcMain.handle('search-music', async (_event, { keyword }) => {
+  ipcMain.handle('search-music', async (_event, { keyword, cookie }) => {
     console.log('🎵 收到搜索请求，关键词:', keyword)
 
     if (!keyword || keyword.trim().length === 0) {
@@ -285,7 +317,7 @@ function registerIpcHandlers() {
     }
 
     try {
-      const songs = await searchMusic(keyword, 20)
+      const songs = await searchMusic(keyword, 20, cookie)
       console.log(`✅ 找到 ${songs.length} 首歌曲`)
       return songs
     } catch (error) {
@@ -295,7 +327,7 @@ function registerIpcHandlers() {
   })
 
   // 根据 musicIds 获取歌曲详情、歌词和播放地址
-  ipcMain.handle('get-music-by-ids', async (_event, { musicIds }) => {
+  ipcMain.handle('get-music-by-ids', async (_event, { musicIds, cookie }) => {
     console.log('🎵 收到 ID 查询请求:', musicIds)
 
     if (!musicIds || musicIds.trim().length === 0) {
@@ -307,9 +339,9 @@ function registerIpcHandlers() {
       const songs = await Promise.all(
         ids.map(async (id) => {
           const [detail, lyric, urlResponse] = await Promise.all([
-            getSongDetail(id),
-            getSongLyric(id),
-            getSongUrl(id)
+            getSongDetail(id, cookie),
+            getSongLyric(id, cookie),
+            getSongUrl(id, 'sky', cookie)
           ])
 
           return {
@@ -329,27 +361,27 @@ function registerIpcHandlers() {
     }
   })
 
-  ipcMain.handle('get-music-lyric', async (_event, { musicId }) => {
+  ipcMain.handle('get-music-lyric', async (_event, { musicId, cookie }) => {
     if (!musicId) {
       throw new Error('musicId 不能为空')
     }
-    return getSongLyric(musicId)
+    return getSongLyric(musicId, cookie)
   })
 
-  ipcMain.handle('get-music-url', async (_event, { musicId, level = 'sky' }) => {
+  ipcMain.handle('get-music-url', async (_event, { musicId, level = 'sky', cookie }) => {
     const id = String(musicId)
     if (!id || id === '') {
       throw new Error('musicId 不能为空')
     }
-    return getSongUrl(id, level)
+    return getSongUrl(id, level, cookie)
   })
 
-  ipcMain.handle('get-music-url-by-id', async (_event, { musicId, level = 'sky' }: { musicId: number; level?: string }) => {
+  ipcMain.handle('get-music-url-by-id', async (_event, { musicId, level = 'sky', cookie }: { musicId: number; level?: string; cookie?: string }) => {
     const id = String(musicId)
     if (!id || id === '') {
       throw new Error('musicId 不能为空')
     }
-    return getSongUrl(id, level)
+    return getSongUrl(id, level, cookie)
   })
 
   // 关闭窗口
@@ -359,12 +391,12 @@ function registerIpcHandlers() {
   })
 
   // 下载音乐文件
-  ipcMain.handle('download-music', async (_event, { musicId, songName, artistName }: { musicId: number; songName: string; artistName: string }) => {
+  ipcMain.handle('download-music', async (_event, { musicId, songName, artistName, cookie }: { musicId: number; songName: string; artistName: string; cookie?: string }) => {
     console.log('⬇ 收到下载请求:', songName, '-', artistName)
     if (!musicId) {
       return { success: false, error: 'musicId 不能为空' }
     }
-    return downloadMusic(musicId, songName, artistName)
+    return downloadMusic(musicId, songName, artistName, cookie)
   })
 
   // 获取分享链接
@@ -379,7 +411,7 @@ function registerIpcHandlers() {
   // 设置 Cookie
   ipcMain.handle('set-cookie', async (_event, { cookie }: { cookie: string }) => {
     console.log('🍪 设置 Cookie')
-    userCookie = cookie.trim()
+    userCookie = normalizeMusicCookie(cookie)
     return { success: true, masked: userCookie ? userCookie.slice(0, 8) + '...' : '(空)' }
   })
 

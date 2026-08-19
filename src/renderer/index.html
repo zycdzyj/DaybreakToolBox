@@ -16,6 +16,8 @@
 
       /* iframe 容器：填满内容区 */
       .frame-container {
+        display: flex;
+        flex-direction: column;
         flex: 1;
         min-height: 0;
         position: relative;
@@ -23,11 +25,10 @@
       }
 
       .frame-container iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
+        display: block;
+        flex: 1;
+        min-height: 0;
         width: 100%;
-        height: 100%;
         border: none;
         background: transparent;
       }

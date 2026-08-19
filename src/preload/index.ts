@@ -4,26 +4,26 @@ import { contextBridge, ipcRenderer } from 'electron'
 // 1. 定义安全的 API
 const api = {
   // 搜索音乐（使用 invoke，返回 Promise）
-  searchMusic: (keyword: string) => {
-    return ipcRenderer.invoke('search-music', { keyword })
+  searchMusic: (keyword: string, cookie?: string) => {
+    return ipcRenderer.invoke('search-music', { keyword, cookie })
   },
 
   // 根据 musicIds 查询歌曲详情、歌词和播放地址
-  getMusicByIds: (musicIds: string) => {
-    return ipcRenderer.invoke('get-music-by-ids', { musicIds })
+  getMusicByIds: (musicIds: string, cookie?: string) => {
+    return ipcRenderer.invoke('get-music-by-ids', { musicIds, cookie })
   },
 
-  getMusicLyric: (musicId: string) => {
-    return ipcRenderer.invoke('get-music-lyric', { musicId })
+  getMusicLyric: (musicId: string, cookie?: string) => {
+    return ipcRenderer.invoke('get-music-lyric', { musicId, cookie })
   },
 
-  getMusicUrl: (musicId: string, level: string = 'sky') => {
-    return ipcRenderer.invoke('get-music-url', { musicId, level })
+  getMusicUrl: (musicId: string, level: string = 'sky', cookie?: string) => {
+    return ipcRenderer.invoke('get-music-url', { musicId, level, cookie })
   },
 
   // 下载音乐文件到本地
-  downloadMusic: (musicId: number, songName: string, artistName: string) => {
-    return ipcRenderer.invoke('download-music', { musicId, songName, artistName })
+  downloadMusic: (musicId: number, songName: string, artistName: string, cookie?: string) => {
+    return ipcRenderer.invoke('download-music', { musicId, songName, artistName, cookie })
   },
   openFile: (toolName: string) => {
     return ipcRenderer.invoke('open-file', { toolName })
@@ -64,11 +64,11 @@ if (process.contextIsolated) {
 declare global {
   interface Window {
     api: {
-      searchMusic: (keyword: string) => Promise<Song[]>
-      getMusicByIds: (musicIds: string) => Promise<unknown>
-      getMusicLyric: (musicId: string) => Promise<unknown>
-      getMusicUrl: (musicId: string, level?: string) => Promise<unknown>
-      downloadMusic: (musicId: number, songName: string, artistName: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
+      searchMusic: (keyword: string, cookie?: string) => Promise<Song[]>
+      getMusicByIds: (musicIds: string, cookie?: string) => Promise<unknown>
+      getMusicLyric: (musicId: string, cookie?: string) => Promise<unknown>
+      getMusicUrl: (musicId: string, level?: string, cookie?: string) => Promise<unknown>
+      downloadMusic: (musicId: number, songName: string, artistName: string, cookie?: string) => Promise<{ success: boolean; filePath?: string; error?: string }>
       getShareUrl: (musicId: number) => Promise<{ url: string }>
       setCookie: (cookie: string) => Promise<{ success: boolean; masked: string }>
       getCookie: () => Promise<{ cookie: string; masked: string }>

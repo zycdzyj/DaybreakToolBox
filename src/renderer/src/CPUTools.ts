@@ -7,33 +7,25 @@ interface HardwareTool {
 
 const hardwareTools: HardwareTool[] = [
   { name: 'CPU-Z', icon: 'C' },
-  { name: 'GPU-Z', icon: 'G' },
-  { name: 'AIDA64', icon: 'A' },
-  { name: 'HWInfo', icon: 'H' },
-  { name: 'Speccy', icon: 'S' },
-  { name: 'CrystalDiskInfo', icon: 'D' },
-  { name: 'HWMonitor', icon: 'M' },
-  { name: 'OpenHardwareMonitor', icon: 'O' },
-  { name: 'SIW', icon: 'I' },
-  { name: 'Everest', icon: 'E' },
-  { name: '3DMark', icon: '3' },
-  { name: 'HWi64', icon: 'W' }
+  { name: 'LinX', icon: 'L' },
+  { name: 'Prime95', icon: 'P' },
+  { name: 'SuperPI', icon: 'S' },
+  { name: 'ThrottleStop', icon: 'T' },
+  { name: 'wPrime', icon: 'W' },
+  { name: 'XIANGQI', icon: 'X' },
+  { name: '线程炸弹', icon: '炸' }
 ]
 
 // 工具图标颜色映射
 const iconColors: Record<string, string> = {
   C: '#4E79A7',
-  G: '#F28E2B',
-  A: '#59A14F',
-  H: '#E15759',
+  L: '#F28E2B',
+  P: '#59A14F',
   S: '#76B7B2',
-  D: '#EDC948',
-  M: '#B07AA1',
-  O: '#9C755F',
-  I: '#4E79A7',
-  E: '#F28E2B',
-  3: '#59A14F',
-  W: '#E15759'
+  T: '#EDC948',
+  W: '#B07AA1',
+  X: '#9C755F',
+  炸: '#E15759'
 }
 
 // 渲染工具网格
@@ -57,7 +49,7 @@ function renderTools(): void {
       <div class="tool-name">${tool.name}</div>
     `
 
-    // 双击启动（模拟）
+    // 双击启动工具
     item.addEventListener('dblclick', () => {
       const statusText = document.getElementById('status-text')
       if (statusText) {
