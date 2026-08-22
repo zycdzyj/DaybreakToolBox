@@ -179,6 +179,7 @@ body {
 
 .nav-indicator {
     position: absolute;
+    top: 0;
     left: 8px;
     right: 8px;
     height: 40px;

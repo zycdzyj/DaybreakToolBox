@@ -43,6 +43,7 @@ export default defineConfig({
           netEase: resolve(__dirname, 'src/renderer/NetEase.html'),
           cpuTools: resolve(__dirname, 'src/renderer/CPUTools.html'),
           cryptoPage: resolve(__dirname, 'src/renderer/cryptoPage.html'),
+          documentTools: resolve(__dirname, 'src/renderer/documentTools.html'),
           otherTools: resolve(__dirname, 'src/renderer/otherTools.html'),
           memoryTools: resolve(__dirname, 'src/renderer/memoryTools.html'),
           processorTools: resolve(__dirname, 'src/renderer/processorTools.html'),

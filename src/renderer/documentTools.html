@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文档处理 - 破晓工具箱</title>
+    <link rel="stylesheet" href="assets/main.css" />
+    <link rel="stylesheet" href="assets/documentTools.css" />
+  </head>
+  <body>
+    <main class="frame-page document-page">
+      <header class="document-header">
+        <div>
+          <p class="eyebrow">实用工具</p>
+          <h1>文档处理</h1>
+        </div>
+        <span class="document-status" id="documentStatus">等待导入文件</span>
+      </header>
+
+      <section class="document-grid" aria-label="文档处理工作区">
+        <section class="document-panel import-panel">
+          <div class="panel-heading">
+            <span class="step-number">01</span>
+            <div>
+              <h2>导入文件</h2>
+              <p>拖拽文件到此处，重复拖拽会覆盖当前文件</p>
+            </div>
+          </div>
+          <div class="drop-zone" id="documentDropZone" tabindex="0" role="button" aria-label="拖拽或选择文档文件">
+            <img class="format-icon" id="sourceFileIcon" src="assets/icons/document-file.svg" alt="待导入文件" />
+            <strong id="sourceFileName">拖拽文件到这里</strong>
+            <span id="sourceFileHint">支持 Word、Excel、PDF、PowerPoint</span>
+            <input id="documentFileInput" type="file" hidden />
+          </div>
+        </section>
+
+        <section class="document-panel conversion-panel">
+          <div class="panel-heading">
+            <span class="step-number">02</span>
+            <div>
+              <h2>转换</h2>
+              <p>选择目标格式后执行转换检查</p>
+            </div>
+          </div>
+          <div class="conversion-grid">
+            <label class="format-field">
+              <span>转换方式</span>
+              <select id="conversionType">
+                <option value="word-pdf">Word → PDF</option>
+                <option value="excel-html">Excel → HTML</option>
+                <option value="pdf-markdown">PDF → Markdown</option>
+                <option value="powerpoint-svg">PowerPoint → SVG</option>
+                <option value="word-excel">Word → Excel</option>
+              </select>
+            </label>
+            <button class="document-button primary" id="convertDocumentButton" type="button">开始转换</button>
+          </div>
+          <p class="conversion-message" id="conversionMessage">请选择文件并匹配支持的转换格式。</p>
+        </section>
+
+        <section class="document-panel result-panel">
+          <div class="panel-heading">
+            <span class="step-number">03</span>
+            <div>
+              <h2>转换后结果</h2>
+              <p>转换完成后将在这里显示目标格式</p>
+            </div>
+          </div>
+          <div class="result-preview" id="resultPreview">
+            <img class="format-icon" id="resultFileIcon" src="assets/icons/document-result.svg" alt="转换结果" />
+            <strong id="resultFileName">尚无转换结果</strong>
+            <span id="resultFileHint">转换结果将在此显示</span>
+          </div>
+        </section>
+      </section>
+
+      <footer class="document-actions">
+        <button class="document-button" id="downloadResultButton" type="button">下载</button>
+        <button class="document-button" id="saveToExportButton" type="button">保存到 export</button>
+        <button class="document-button" id="saveToSpecifiedDirectoryButton" type="button">保存到指定目录</button>
+      </footer>
+    </main>
+    <script type="module" src="./src/documentTools.ts"></script>
+  </body>
+</html>

@@ -2,24 +2,28 @@
 // 主框架导航栏切换逻辑：通过 iframe 加载各功能页面，切换时淡入淡出
 
 const FADE_MS = 250 // 与 CSS 中的 transition 时长保持一致
-const toolboxPages = new Set([
-  'otherTools.html',
-  'memoryTools.html',
-  'processorTools.html',
-  'peripheralTools.html',
-  'commonTools.html',
-  'graphicsTools.html',
-  'monitorTools.html',
-  'stressTools.html',
-  'diskTools.html',
-  'comprehensiveTools.html'
-])
+const MENU_TRANSITION_MS = 400 // 与菜单展开/收起动画时长保持一致
+const groupPages: Record<string, Set<string>> = {
+  utility: new Set(['cryptoPage.html', 'documentTools.html']),
+  toolbox: new Set([
+    'otherTools.html',
+    'memoryTools.html',
+    'processorTools.html',
+    'peripheralTools.html',
+    'commonTools.html',
+    'graphicsTools.html',
+    'monitorTools.html',
+    'stressTools.html',
+    'diskTools.html',
+    'comprehensiveTools.html'
+  ])
+}
 
 const frameContainer = document.getElementById('frame-container') as HTMLElement | null
 const sidebar = document.querySelector<HTMLElement>('.sidebar')
 const navIndicator = document.querySelector<HTMLElement>('.nav-indicator')
 const navItems = Array.from(document.querySelectorAll<HTMLElement>('.nav-item'))
-const toolboxGroup = document.querySelector<HTMLElement>('.nav-group')
+const navGroups = Array.from(document.querySelectorAll<HTMLElement>('.nav-group'))
 
 // 记录当前加载的页面，避免重复加载
 let currentPage: string | null = null
@@ -28,6 +32,7 @@ let currentFrame: HTMLIFrameElement | null = null
 // 正在切页时禁止再次触发导航，避免旧 iframe 还没移除时再次切换造成竞态和内存泄露
 let isSwitching = false
 let ignoreNextNavRequest = false
+let menuSyncToken = 0
 
 function setNavEnabled(enabled: boolean): void {
   navItems.forEach((item) => {
@@ -51,16 +56,61 @@ function updateNavIndicator(target: HTMLElement | null): void {
   navIndicator.style.transform = `translateY(${offsetY}px)`
 }
 
-function setToolboxMenuOpen(open: boolean): void {
-  if (!toolboxGroup) {
+function syncNavIndicatorWithMenu(): void {
+  const syncToken = ++menuSyncToken
+  const startTime = performance.now()
+
+  const sync = (): void => {
+    if (syncToken !== menuSyncToken) {
+      return
+    }
+
+    const activeTarget = navItems.find((item) => item.classList.contains('active')) ?? null
+    updateNavIndicator(activeTarget)
+
+    if (performance.now() - startTime < MENU_TRANSITION_MS) {
+      requestAnimationFrame(sync)
+    }
+  }
+
+  requestAnimationFrame(sync)
+}
+
+function waitForMenuTransition(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, MENU_TRANSITION_MS)
+  })
+}
+
+function setGroupMenuOpen(groupName: string, open: boolean, updateIndicator = true): void {
+  const group = navGroups.find((item) => item.dataset.group === groupName)
+  if (!group) {
     return
   }
 
-  toolboxGroup.classList.toggle('open', open)
+  group.classList.toggle('open', open)
 
-  const activeTarget = navItems.find((item) => item.classList.contains('active')) ?? null
-  if (activeTarget) {
-    updateNavIndicator(activeTarget)
+  if (updateIndicator) {
+    syncNavIndicatorWithMenu()
+  }
+}
+
+async function prepareMenuForPage(targetGroupName: string | undefined, clickedItem: HTMLElement | null): Promise<void> {
+  if (clickedItem?.closest<HTMLElement>('.nav-group.open')) {
+    return
+  }
+
+  if (targetGroupName && currentPage !== null && groupPages[targetGroupName]?.has(currentPage)) {
+    return
+  }
+
+  navGroups.forEach((group) => {
+    setGroupMenuOpen(group.dataset.group ?? '', false, false)
+  })
+  await waitForMenuTransition()
+
+  if (targetGroupName) {
+    setGroupMenuOpen(targetGroupName, true, false)
   }
 }
 
@@ -83,9 +133,6 @@ function createFrame(page: string): HTMLIFrameElement {
   return frame
 }
 
-/**
- * 淡出当前 iframe，并在动画结束后将其从 DOM 中移除（释放内存）
- */
 function fadeOutAndRemove(frame: HTMLIFrameElement): Promise<void> {
   return new Promise((resolve) => {
     // 移除淡入类，添加淡出类
@@ -121,7 +168,7 @@ function fadeIn(frame: HTMLIFrameElement): Promise<void> {
 /**
  * 切换页面
  */
-async function switchPage(page: string): Promise<void> {
+async function switchPage(page: string, clickedItem: HTMLElement | null = null): Promise<void> {
   if (isSwitching) {
     ignoreNextNavRequest = true
     return
@@ -145,9 +192,9 @@ async function switchPage(page: string): Promise<void> {
     item.classList.toggle('active', item.dataset.page === page)
   })
 
-  const selectedItem = navItems.find((item) => item.dataset.page === page) ?? null
-  updateNavIndicator(selectedItem)
-  setToolboxMenuOpen(toolboxPages.has(page))
+  const targetGroupName = Object.entries(groupPages).find(([, pages]) => pages.has(page))?.[0]
+  await prepareMenuForPage(targetGroupName, clickedItem)
+  syncNavIndicatorWithMenu()
 
   try {
     // 1. 淡出并移除旧的 iframe
@@ -178,26 +225,24 @@ async function switchPage(page: string): Promise<void> {
  * 初始化：绑定导航点击事件，默认加载第一个页面
  */
 function init(): void {
-  const toolboxTrigger = document.querySelector<HTMLElement>('.nav-group-trigger')
+  document.querySelectorAll<HTMLElement>('.nav-group-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation()
+      const groupName = trigger.dataset.groupTrigger
+      const group = trigger.closest<HTMLElement>('.nav-group')
+      if (!group || !groupName) {
+        return
+      }
 
-  toolboxTrigger?.addEventListener('click', (event) => {
-    event.stopPropagation()
-    if (!toolboxGroup) {
-      return
-    }
+      const isOpen = group.classList.contains('open')
+      const isInSubmenuPage = currentPage !== null && groupPages[groupName]?.has(currentPage) === true
 
-    const isOpen = toolboxGroup.classList.contains('open')
-    const isInSubmenuPage = currentPage !== null && toolboxPages.has(currentPage)
+      if (isInSubmenuPage && isOpen) {
+        return
+      }
 
-    if (isInSubmenuPage && isOpen) {
-      return
-    }
-
-    toolboxGroup.classList.toggle('open', !isOpen)
-
-    if (!isOpen && isInSubmenuPage) {
-      setToolboxMenuOpen(true)
-    }
+      setGroupMenuOpen(groupName, !isOpen)
+    })
   })
 
   navItems.forEach((item) => {
@@ -221,14 +266,14 @@ function init(): void {
         return
       }
 
-      void switchPage(page)
+      void switchPage(page, item)
     })
   })
 
   // 默认加载第一个导航项对应的页面（NetEase.html）
   const defaultItem = navItems[0]
   const defaultPage = defaultItem?.dataset.page || 'NetEase.html'
-  setToolboxMenuOpen(false)
+  navGroups.forEach((group) => setGroupMenuOpen(group.dataset.group ?? '', false))
   window.addEventListener('resize', () => {
     const activeTarget = navItems.find((item) => item.classList.contains('active')) ?? null
     updateNavIndicator(activeTarget)
